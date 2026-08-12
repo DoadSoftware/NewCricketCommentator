@@ -26,7 +26,7 @@
 	
 </head>
 <body>
-<form:form name="ident_form" autocomplete="off" action="change_to_ident" method="POST" enctype="multipart/form-data">
+<form:form name="ident_form" autocomplete="off" action="change_to_ident" method="POST" >
 <div class="content py-8" style="background-color: #000000; color: #2E008B">
 	<div class="row ; text-nowrap">
 	 <div class="col-xl">

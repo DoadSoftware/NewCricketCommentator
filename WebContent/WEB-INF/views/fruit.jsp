@@ -10,10 +10,15 @@
 	
 <script src="<c:url value='/webjars/jquery/3.6.0/jquery.min.js'/>"></script>
 <script src="<c:url value='/webjars/bootstrap/5.1.3/js/bootstrap.bundle.min.js'/>"></script>
+<script src="<c:url value='/resources/javascript/fruit-board.js'/>"></script>
 <script src="<c:url value='/resources/javascript/index.js'/>"></script>
 
 <link rel="stylesheet" href="<c:url value='/webjars/bootstrap/5.1.3/css/bootstrap.min.css'/>">
 <link rel="stylesheet" href="<c:url value='/webjars/font-awesome/6.0.0/css/all.min.css'/>">
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@600;700&family=Oswald:wght@500;600;700&family=Inter:wght@500;600;700&display=swap" rel="stylesheet">
+<link rel="stylesheet" href="<c:url value='/resources/css/fruit-theme.css'/>">
+<link rel="stylesheet" href="<c:url value='/resources/css/fruit-board.css'/>">
 	
   <script type="text/javascript">
   $(document).on("keydown", function(e){
@@ -26,13 +31,13 @@
 	
 </head>
 <body>
-<form:form name="fruit_form" autocomplete="off" action="change_to_fruit" method="POST" enctype="multipart/form-data">
-<div class="content py-8" style="background-color: #EAE8FF; color: #2E008B">
+<form:form name="fruit_form" autocomplete="off" action="change_to_fruit" method="POST" >
+<div class="content py-8" style="background-color: #0A1747; color: #FFFFFF">
 	<div class="row ; text-nowrap" style="height:100% width: 100% ;">
 	 <div class="col-xl">
        <span class="anchor"></span>
           <div class="card-body">
-			  <div id="fruit_captions_div" class="form-group row row-bottom-margin ml-2 " style="height:50% width: 50%;">
+			  <div id="fruit_captions_div" class="form-group row row-bottom-margin ml-2">
 			  </div>
 	       </div>
        </div>

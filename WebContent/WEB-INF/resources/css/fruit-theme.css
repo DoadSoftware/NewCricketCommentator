@@ -1,0 +1,83 @@
+/* =====================================================
+   Sanatan Premier League — Fruit Screen Theme
+   Matched to broadcast graphic reference (Design on a Dime)
+   ===================================================== */
+:root{
+  --spl-navy-dark:   #0A1747;  /* primary background / headers */
+  --spl-navy-mid:    #0F2050;
+  --spl-navy-deep:   #08123A;
+  --spl-white:       #FFFFFF;  /* card / row backgrounds */
+  --spl-gold:        #F2C230;  /* CRR box, header bars, highlights */
+  --spl-gold-light:  #F7D774;  /* secondary gold / peach accents */
+  --spl-red:         #D42027;  /* score box / wicket highlight */
+  --spl-gray:        #7A7A7A;  /* neutral panel */
+  --spl-gray-light:  #B0B0B0;
+  --spl-cyan:        #6FC6E9;  /* speed/last-ball accent */
+  --spl-border:      #000000;
+  --spl-text-dark:   #0A1747;
+  --spl-text-light:  #FFFFFF;
+}
+
+html, body{
+  height:100%;
+  margin:0;
+  padding:0;
+  overflow:hidden;             /* broadcast graphic must never show a scrollbar */
+  background-color: var(--spl-navy-dark);
+  color: var(--spl-text-light);
+  font-family: 'Segoe UI', Arial, Helvetica, sans-serif;
+}
+
+.content.py-8{
+  background-color: var(--spl-navy-dark) !important;
+  color: var(--spl-text-light) !important;
+  height: 100vh;
+  width: 100%;
+  padding: 0 !important;
+  box-sizing: border-box;
+  overflow:hidden;
+}
+
+/* Stage/centering frame: fruit-board.js measures #fruit_board's natural size
+   at 1920px design width, then scales it to fit exactly inside this box
+   (see fb_fitToViewport in fruit-board.js). This is what stops the board
+   clipping or scrolling regardless of the actual OBS/browser window size. */
+#fruit_captions_div{
+  width: 100%;
+  height: 100vh;
+  overflow: hidden;
+  display: flex;
+  align-items: flex-start;
+  justify-content: center;
+}
+
+#fruit_captions_div table{
+  width: 100%;
+  border-collapse: collapse;
+  table-layout: fixed;
+}
+
+#fruit_captions_div td,
+#fruit_captions_div th{
+  border: 2px solid var(--spl-border);
+  padding: 4px 6px;
+  word-wrap: break-word;
+}
+
+/* NOTE: the old responsive font-size clamp() breakpoints that lived here have
+   been removed. Sizing is now handled once, correctly, by fb_fitToViewport()
+   in fruit-board.js, which scales the whole 1920px-wide board as a single
+   unit — layering viewport-relative font clamps on top of that would double
+   -compensate and make text sizing unpredictable. */
+
+/* subtle premium metallic sheen for gold header bars, applied via class
+   (optional utility class you can add from JS: cell.classList.add('spl-gold-metal')) */
+.spl-gold-metal{
+  background: linear-gradient(180deg, #FFE9A8 0%, #F2C230 45%, #C9971A 100%) !important;
+  color: var(--spl-navy-dark) !important;
+}
+
+.spl-navy-metal{
+  background: linear-gradient(180deg, #16276B 0%, #0A1747 55%, #060D2E 100%) !important;
+  color: var(--spl-white) !important;
+}

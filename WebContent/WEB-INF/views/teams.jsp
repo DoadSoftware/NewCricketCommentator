@@ -26,7 +26,7 @@
 	
 </head>
 <body>
-<form:form name="teams_form" autocomplete="off" action="change_to_teams" method="POST" enctype="multipart/form-data">
+<form:form name="teams_form" autocomplete="off" action="change_to_teams" method="POST" >
 <div class="content py-8" style="background-color: #EAE8FF; color: #2E008B">
 	<div class="row ; text-nowrap" style="height:100% width: 100% ;">
 	 <div class="col-xl">

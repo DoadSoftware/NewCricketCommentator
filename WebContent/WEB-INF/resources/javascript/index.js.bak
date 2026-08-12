@@ -75,10 +75,10 @@ function processCricketProcedures(whatToProcess)
 		break;
 	}
 
-	$.ajax({
-        type : 'Get',
-        url : 'processCricketProcedures.html',
-        data : 'whatToProcess=' + whatToProcess + '&valueToProcess=' + valueToProcess,
+	$.ajax({    
+        type : 'Get',     
+        url : 'processCricketProcedures.html',     
+        data : 'whatToProcess=' + whatToProcess + '&valueToProcess=' + valueToProcess, 
         dataType : 'json',
         success : function(data) {
         	switch(whatToProcess) {
@@ -86,68 +86,24 @@ function processCricketProcedures(whatToProcess)
 				if(data){
 					addItemsToList(whatToProcess,data);
 					document.getElementById('matchFileTimeStamp').value = data.setup.matchFileTimeStamp;
-				} else if($('#select_page').length && $('#select_page').val() == 'fruit'){
-					/* server responded but with no data - surface it instead of a blank screen */
-					$('#fruit_captions_div').html(
-						'<div style="color:#F7D774;background:#0A1747;padding:24px;font-family:Segoe UI,Arial,sans-serif;font-size:16px;border:2px solid #F2C230;">' +
-						'Server returned no match data for this request.' +
-						'</div>'
-					);
-					document.getElementById('fruit_captions_div').style.display = '';
 				}
+				/*if($('#matchFileTimeStamp').val() != data.setup.matchFileTimeStamp) {
+					addItemsToList(whatToProcess,data);
+					document.getElementById('matchFileTimeStamp').value = data.setup.matchFileTimeStamp;
+				}*/
 				break;
         	}
-	    },
-	    error : function(e) {
-	  	 	console.log('Error occured in ' + whatToProcess + ' with error description = ' + e);
-	  	 	if(whatToProcess == 'READ-MATCH-AND-POPULATE' && $('#select_page').length && $('#select_page').val() == 'fruit'){
-	  	 		/* AJAX call itself failed (network/session/500) - surface it instead of a blank screen */
-	  	 		$('#fruit_captions_div').html(
-	  	 			'<div style="color:#F7D774;background:#0A1747;padding:24px;font-family:Segoe UI,Arial,sans-serif;font-size:16px;border:2px solid #F2C230;">' +
-	  	 			'Could not reach the server (processCricketProcedures.html).<br>Check DevTools (F12) &rarr; Network tab for the failed request\'s status code.' +
-	  	 			'</div>'
-	  	 		);
-	  	 		document.getElementById('fruit_captions_div').style.display = '';
-	  	 	}
-	    }
+	    },    
+	    error : function(e) {    
+	  	 	console.log('Error occured in ' + whatToProcess + ' with error description = ' + e);     
+	    }    
 	});
 }
 function addItemsToList(whatToProcess, dataToProcess)
 {
 	switch (whatToProcess) {
 	case 'READ-MATCH-AND-POPULATE':
-
-		/* Premium fruit-screen board: new dedicated renderer.
-		   Only used on the 'fruit' page - all other pages (teams/ident/initialise)
-		   keep using the legacy table-building code below untouched. */
-		if($('#select_page').length && $('#select_page').val() == 'fruit'){
-			if(typeof renderFruitBoard === 'function'){
-				try{
-					renderFruitBoard(dataToProcess);
-				}catch(fbErr){
-					console.error('renderFruitBoard threw an error:', fbErr);
-					$('#fruit_captions_div').html(
-						'<div style="color:#F7D774;background:#0A1747;padding:24px;font-family:Segoe UI,Arial,sans-serif;font-size:16px;border:2px solid #F2C230;">' +
-						'Fruit board failed to render.<br>Open browser DevTools (F12) &rarr; Console tab and send me the red error text.' +
-						'</div>'
-					);
-					document.getElementById('fruit_captions_div').style.display = '';
-				}
-			} else {
-				/* fruit-board.js did not load - most likely a 404 on
-				   /resources/javascript/fruit-board.js. Never fail silently. */
-				console.error('renderFruitBoard is undefined - fruit-board.js did not load (check Network tab for a 404).');
-				$('#fruit_captions_div').html(
-					'<div style="color:#F7D774;background:#0A1747;padding:24px;font-family:Segoe UI,Arial,sans-serif;font-size:16px;border:2px solid #F2C230;">' +
-					'fruit-board.js was not loaded by the browser.<br>Check DevTools (F12) &rarr; Network tab for a 404 on ' +
-					'<code>/resources/javascript/fruit-board.js</code> and confirm the file was deployed to WEB-INF/resources/javascript/.' +
-					'</div>'
-				);
-				document.getElementById('fruit_captions_div').style.display = '';
-			}
-			return;
-		}
-
+		
 		var table_head,table_bat,table_score,table_detail,table_Bowl,table_Other,table_Other1,table_PS,table_fow,tbody,row,cell,count,table_BC,table_BOC,table_team;
 		
 		$('#fruit_captions_div').empty();
@@ -167,7 +123,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				if(inn.isCurrentInning == 'YES'){
 					for (var i = 1; i <= 13; i++){
 						row = tbody.insertRow(tbody.rows.length);
-						row.style="background-color: #F2C230 ;border-width: 2px;line-height: 5px;";
+						row.style="background-color: #D8E4BC ;border-width: 2px;line-height: 5px;";
 						row.style.fontFamily = 'Rockwell';
 						switch(i){
 							case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
@@ -181,7 +137,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 							cell = row.insertCell(j-1);
 							switch(i){
 								case 1:
-									cell.style = "background: #F2C230;font-weight: bold;border-color: Black;border-width: 2px;line-height: 50px;font-size:40px;";
+									cell.style = "background: #D8E4BC;font-weight: bold;border-color: Black;border-width: 2px;line-height: 50px;font-size:40px;";
 									switch(j){
 										case 1:
 										//cell.colSpan = 3;
@@ -200,7 +156,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									}	
 									break;
 								case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
-									cell.style="background-color: #F2C230 ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 50px;font-size:30px;";
+									cell.style="background-color: #D8E4BC ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 50px;font-size:30px;";
 									//cell.style.height = "39px"
 									
 									switch(j){
@@ -234,7 +190,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									break;
 								case 13:
 									cell.colSpan = 2;
-									cell.style = "background: #0A1747; color: #FFFFFF;font-size:32px; font-weight: bold;line-height: 34px;";
+									cell.style = "background: #0000FF; color: #FFFFFF;font-size:32px; font-weight: bold;line-height: 34px;";
 									cell.style.textAlign = "center";
 									cell.style.height = "25px"
 									cell.style.width = "20px"
@@ -262,7 +218,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				row = tbody.insertRow(tbody.rows.length);
 				switch(i){
 					case 1:
-						row.style="background-color: #0A1747 ; color: #FFFFFF; font-size:25px; font-weight: bold;";
+						row.style="background-color: #000000 ; color: #ffffff; font-size:25px; font-weight: bold;";
 						row.style.fontFamily = 'Rockwell';
 						row.style.textAlign = "center";
 						row.innerHTML = dataToProcess.setup.homeTeam.teamName1 + " v " + dataToProcess.setup.awayTeam.teamName1 +' - '+ dataToProcess.setup.tournament +
@@ -282,7 +238,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 
 			for (var i = 1; i <= 4; i++){
 				row = tbody.insertRow(tbody.rows.length);
-				row.style = "background: #F2C230; color: #0A1747; border-color: Black;border-width: 3px;font-weight: bold;"
+				row.style = "background: #D8E4BC; color: #0A0B0A; border-color: Black;border-width: 3px;font-weight: bold;"
 				//row.style.padding = '50px';
 				row.style.fontFamily = 'Rockwell';
 				var player1_found = false;
@@ -410,7 +366,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[size - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == hs.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = hs.ticker_name.slice(0,10);
 														}
 													}else{
@@ -423,7 +379,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[size - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == hos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = hos.ticker_name.slice(0,10);
 														}
 													}else{
@@ -436,7 +392,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[size - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == hsub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = hsub.ticker_name.slice(0,10);
 														}
 													}else{
@@ -448,7 +404,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == as.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = as.ticker_name.slice(0,10);
 														}
 													}else{
@@ -460,7 +416,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == aos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = aos.ticker_name.slice(0,10);
 														}
 													}else{
@@ -472,7 +428,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == asub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = asub.ticker_name.slice(0,10);
 														}
 													}else{
@@ -486,7 +442,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													inn.battingCard.forEach(function(bc,index,arr){
 														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
 															//alert(bc.runs +' ('+bc.balls+')')
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 															cell.innerHTML = bc.runs +' ('+bc.balls+')';
 														}
 													});
@@ -496,7 +452,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 												if(inn.fallsOfWickets.length > 0){
 													inn.battingCard.forEach(function(bc,index,arr){
 														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 															cell.innerHTML = bc.fours + '/' + bc.sixes;
 														}
 													});
@@ -507,10 +463,10 @@ function addItemsToList(whatToProcess, dataToProcess)
 													inn.battingCard.forEach(function(bc,index,arr){
 														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
 															if(bc.strikeRate == 0){
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+																cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 																cell.innerHTML = '-';
 															}else{
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+																cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 																cell.innerHTML = bc.strikeRate;
 															}
 														}
@@ -520,7 +476,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 											case 5:
 												for(var key in inn.stats){
 													if(key == 'BATSMAN_OUT'){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+														cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 														cell.innerHTML = inn.stats[key].split(',')[0];
 													}
 												}
@@ -528,11 +484,11 @@ function addItemsToList(whatToProcess, dataToProcess)
 											case 6:
 												if(inn.partnerships.length > 0 && inn.fallsOfWickets.length > 0) {
 													if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == inn.partnerships[inn.partnerships.length-1].firstBatterNo){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+														cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].firstBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].firstBatterBalls + ')';
 													}
 													else{
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+														cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].secondBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].secondBatterBalls + ')';
 													}
 													
@@ -613,7 +569,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[size - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == hs.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = hs.ticker_name.slice(0,10);
 														}
 													}else{
@@ -626,7 +582,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[size - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == hos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = hos.ticker_name.slice(0,10);
 														}
 													}else{
@@ -639,7 +595,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[size - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == hsub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = hsub.ticker_name.slice(0,10);
 														}
 													}else{
@@ -651,7 +607,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == as.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = as.ticker_name.slice(0,10);
 														}
 													}else{
@@ -663,7 +619,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == aos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = aos.ticker_name.slice(0,10);
 														}
 													}else{
@@ -675,7 +631,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													if(inn.fallsOfWickets.length > 0){
 														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
 														if(inn.fallsOfWickets[size - 1].fowPlayerID == asub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
 															cell.innerHTML = asub.ticker_name.slice(0,10);
 														}
 													}else{
@@ -689,7 +645,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 													inn.battingCard.forEach(function(bc,index,arr){
 														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
 															//alert(bc.runs +' ('+bc.balls+')')
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 															cell.innerHTML = bc.runs +' ('+bc.balls+')';
 														}
 													});
@@ -699,7 +655,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 												if(inn.fallsOfWickets.length > 0){
 													inn.battingCard.forEach(function(bc,index,arr){
 														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+															cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 															cell.innerHTML = bc.fours + '/' + bc.sixes;
 														}
 													});
@@ -710,10 +666,10 @@ function addItemsToList(whatToProcess, dataToProcess)
 													inn.battingCard.forEach(function(bc,index,arr){
 														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
 															if(bc.strikeRate == 0){
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+																cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 																cell.innerHTML = '-';
 															}else{
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+																cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 																cell.innerHTML = bc.strikeRate;
 															}
 														}
@@ -723,7 +679,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 											case 5:
 												for(var key in inn.stats){
 													if(key == 'BATSMAN_OUT'){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+														cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 														cell.innerHTML = inn.stats[key].split(',')[0];
 													}
 												}
@@ -731,11 +687,11 @@ function addItemsToList(whatToProcess, dataToProcess)
 											case 6:
 												if(inn.partnerships.length > 0) {
 													if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == inn.partnerships[inn.partnerships.length-1].firstBatterNo){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+														cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].firstBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].firstBatterBalls + ')';
 													}
 													else{
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
+														cell.style="background: #FF0000;color: #ffffff;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
 														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].secondBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].secondBatterBalls + ')';
 													}
 													
@@ -750,10 +706,10 @@ function addItemsToList(whatToProcess, dataToProcess)
 							});	
 							break;
 						case 4:
-							//cell.style = "background: #D42027; color: Black; border-color: Black;border-width: 3px;font-weight: bold;line-height: 13px;"
+							//cell.style = "background: #ff5050; color: Black; border-color: Black;border-width: 3px;font-weight: bold;line-height: 13px;"
 							switch(j){
 								case 1:
-									cell.style = "background: #D42027;color: #FFFFFF;border-color: Black;border-width: 3px;font-weight: bold;text-align:center;"
+									cell.style = "background: #ff5050;color: #ffffff;border-color: Black;border-width: 3px;font-weight: bold;text-align:center;"
 									cell.style.fontFamily = 'Rockwell';
 									cell.style.fontWeight = "800";
 									cell.style.maxWidth = '180px'
@@ -775,7 +731,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									cell.style.fontFamily = 'Rockwell';
 									switch(j){
 										case 2:
-											cell.style="background: #F2C230;font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;";
+											cell.style="background: #ffc850;font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;";
 											dataToProcess.match.inning.forEach(function(inn,index,arr){
 												if(inn.isCurrentInning == 'YES'){
 													cell.innerHTML = 'EXTRAS <br>' + inn.totalExtras ;
@@ -783,7 +739,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 											});
 											break;
 										case 3:
-											cell.style="background: #F2C230;font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;";
+											cell.style="background: #ffc850;font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;";
 											dataToProcess.match.inning.forEach(function(inn,index,arr){
 												if(inn.isCurrentInning == 'YES'){
 													
@@ -807,7 +763,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 											});
 											break;
 										case 4:
-											cell.style = "background: #9AA0A6; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;font-size:18px;"
+											cell.style = "background: #adb3a7; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;font-size:18px;"
 											dataToProcess.match.inning.forEach(function(inn,index,arr){
 												if(inn.isCurrentInning == 'YES'){
 													for(var key in inn.stats){
@@ -821,7 +777,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									}
 									break;
 								case 5:
-									cell.style = "background: #6FC6E9; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;"
+									cell.style = "background: #699bff; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;"
 									cell.style.fontFamily = 'Rockwell';
 									dataToProcess.match.inning.forEach(function(inn,index,arr){
 										//if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES')
@@ -831,7 +787,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									});
 									break;
 								case 6:
-									cell.style = "background: #6FC6E9; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;font-size:20px;"
+									cell.style = "background: #699bff; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;font-size:20px;"
 									cell.style.fontFamily = 'Rockwell';
 									dataToProcess.match.inning.forEach(function(inn,index,arr){
 										if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES'){
@@ -865,7 +821,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				row = tbody.insertRow(tbody.rows.length);
 				switch(i){
 					case 1:
-						row.style="background-color: #D42027; color: #FFFFFF; font-size:42px; font-weight: bold;border-color: Black;border-width: 2px;";
+						row.style="background-color: #E36C09; color: #FFFFFF; font-size:42px; font-weight: bold;border-color: Black;border-width: 2px;";
 						row.style.height = '20px';
 						row.style.fontFamily = 'Rockwell';
 						row.style.textAlign = "center";
@@ -935,7 +891,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 							});
 						break;
 					case 2:
-						row.style="background-color: #7A7A7A; color: #0A1747; font-size:23px; font-weight: 700;font-weight: bold;border-color: Black;border-width: 2px;line-height: 50px;"
+						row.style="background-color: #E6B8B8; color: #733C98; font-size:23px; font-weight: 700;font-weight: bold;border-color: Black;border-width: 2px;line-height: 50px;"
 						row.style.textAlign = "center";
 						row.style.fontFamily = 'Rockwell';
 						dataToProcess.match.inning.forEach(function(inn,index,arr){
@@ -957,7 +913,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 						});
 						break;
 					case 3:
-						row.style="background-color: #FFFFFF; color: #0A1747; font-size:22px; font-weight: bold;font-weight: bold;border-color: Black;border-width: 2px;line-height: 18px;"
+						row.style="background-color: #C2DBF0; color: #000000; font-size:22px; font-weight: bold;font-weight: bold;border-color: Black;border-width: 2px;line-height: 18px;"
 						row.style.height = '50px';
 						row.style.textAlign = "center";
 						row.style.fontFamily = 'Rockwell';
@@ -981,7 +937,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				
 				for (var i = 1; i <= 5; i++){
 					row = tbody.insertRow(tbody.rows.length);
-					row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
+					row.style = "background: #92CDDB ; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;";
 					switch(i){
 						case 1: case 2:  case 3:  case 4: case 5:
 							count = 4;
@@ -991,33 +947,33 @@ function addItemsToList(whatToProcess, dataToProcess)
 						cell = row.insertCell(j-1);
 						switch(i){
 							case 1:
-								row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
+								row.style = "background: #92CDDB ; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;";
 								row.style.fontFamily = 'Rockwell';
 								switch(j){
 									case 1:
 										cell.innerHTML = '';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										cell.style.width = '38%';
 										break;
 									case 2:
 										cell.innerHTML = 'SCORE';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										cell.style.width = '20%';
 										break;	
 									case 3:
 										cell.innerHTML = 'OVR';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.width = '15%';
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;
 									case 4:
 										cell.innerHTML = 'OVR RATE';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:17px;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-size:17px;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.width = '27%';
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
@@ -1025,7 +981,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 								}
 								break;
 							case 2:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
+								cell.style = "background: #92CDDB ;font-weight: 600; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1051,7 +1007,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			                                    }
 											}
 										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;
@@ -1075,14 +1031,14 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break;
 									case 4:
 										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;	
 								}
 								break;
 							case 3:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
+								cell.style = "background: #92CDDB ;font-weight: 600; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1107,7 +1063,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			                                    }
 											}
 										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;
@@ -1124,14 +1080,14 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break;
 									case 4:
 										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;	
 								}
 								break;	
 							case 4:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
+								cell.style = "background: #92CDDB; font-weight: 600;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1156,7 +1112,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			                                    }
 											}
 										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";		
 										break;
@@ -1169,14 +1125,14 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break;
 									case 4:
 										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;	
 								}
 								break;	
 							case 5:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
+								cell.style = "background: #92CDDB; font-weight: 600;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1201,7 +1157,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			                                    }
 											}
 										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;
@@ -1214,7 +1170,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break;
 									case 4:
 										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;	
@@ -1238,7 +1194,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				
 				for (var i = 1; i <= 5; i++){
 					row = tbody.insertRow(tbody.rows.length);
-					row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
+					row.style = "background: #92CDDB ; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;";
 					switch(i){
 						case 1: case 2:  case 3:  case 4: case 5:
 							count = 3;
@@ -1248,11 +1204,11 @@ function addItemsToList(whatToProcess, dataToProcess)
 						cell = row.insertCell(j-1);
 						switch(i){
 							case 1:
-								row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
+								row.style = "background: #92CDDB ; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;";
 								row.style.fontFamily = 'Rockwell';
 								switch(j){
 									case 1:
-										cell.style = "font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:18px;";
+										cell.style = "font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:18px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										cell.style.width = '30%';
@@ -1284,7 +1240,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 										cell.style.width = '40%';
 										break;	
 									case 3:
-										cell.style = "font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:18px;";
+										cell.style = "font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:18px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										cell.style.width = '30%';
@@ -1315,7 +1271,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 								}
 								break;
 							case 2:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+								cell.style = "background: #92CDDB ;font-weight: 600; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1333,7 +1289,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break
 									case 2:
 										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;
@@ -1352,7 +1308,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 								}
 								break;
 							case 3:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+								cell.style = "background: #92CDDB ;font-weight: 600; color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1369,7 +1325,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break
 									case 2:
 										cell.innerHTML = 'DOTS';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;
@@ -1387,7 +1343,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 								}
 								break;	
 							case 4:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+								cell.style = "background: #92CDDB; font-weight: 600;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1404,7 +1360,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break;
 									case 2:
 										cell.innerHTML = 'AT THIS STAGE';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";		
 										break;
@@ -1418,7 +1374,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 								}
 								break;	
 							case 5:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
+								cell.style = "background: #92CDDB; font-weight: 600;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
 								cell.style.fontFamily = 'Rockwell';
 								cell.style.textAlign = "center";
 								switch(j){
@@ -1431,7 +1387,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 										break;
 									case 2:
 										cell.innerHTML = 'EXTRAS';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
+										cell.style = "background: #92CDDB; font-weight: 700;color: #05285D;font-weight: bold;border-color: Black;border-width: 2px;";
 										cell.style.fontFamily = 'Rockwell';
 										cell.style.textAlign = "center";
 										break;
@@ -1460,7 +1416,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			for (var i = 1; i <= 3; i++){
 				row = tbody.insertRow(tbody.rows.length);
 				//row.id = "bowlerId";
-				row.style = "background: #F7D774; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;"
+				row.style = "background: #FABF8E; color: #000000;font-weight: bold;border-color: Black;border-width: 2px;"
 				row.style.fontFamily = 'Rockwell';
 				var bowler_found = false;
 				switch(i){
@@ -1716,7 +1672,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			
 			for (var i = 1; i <= 3; i++){
 				row = tbody.insertRow(tbody.rows.length);
-				row.style="background-color: #08123A ; color: #FFFFFF;font-weight: bold;border-width: 2px;border-color: Black;line-height: 13px;";
+				row.style="background-color: #000099 ; color: #FFFFFF;font-weight: bold;border-width: 2px;border-color: Black;line-height: 13px;";
 				row.style.fontFamily = 'Rockwell';
 				switch(i){
 					case 1: case 3:
@@ -1729,7 +1685,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				}
 				for (var j=1;j<=count;j++){
 					cell = row.insertCell(j-1);
-					cell.style="background: #08123A;font-weight: bold;border-width: 2px;line-height: 13px;";
+					cell.style="background: #000099;font-weight: bold;border-width: 2px;line-height: 13px;";
 					cell.style.textAlign = 'center';
 					//cell.style.paddingRight = '80px';
 					switch(i){
@@ -1859,7 +1815,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 
 			for (var i = 1; i <= 3; i++){
 				row = tbody.insertRow(tbody.rows.length);
-				row.style="background-color: #B0B0B0 ;color: #0A1747 ;border-color: Black;border-width: 2px;";
+				row.style="background-color: #D99697 ;color: #000000 ;border-color: Black;border-width: 2px;";
 				row.style.fontFamily = 'Rockwell';
 				switch(i){
 					case 1: case 2:
@@ -1872,7 +1828,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				}
 				for (var j=1;j<=count;j++){
 					cell = row.insertCell(j-1);
-					cell.style="background: #B0B0B0 ; font-weight: bold;font-size:16px;border-color: Black;border-width: 2px;";
+					cell.style="background: #D99697 ; font-weight: bold;font-size:16px;border-color: Black;border-width: 2px;";
 					cell.style.textAlign = "center";
 					switch(i){
 						case 1:
@@ -2012,7 +1968,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 				if(inn.isCurrentInning == 'YES'){
 					for (var i = 1; i <= 11; i++){
 						row = tbody.insertRow(tbody.rows.length);
-						row.style="background-color: #F2C230 ;border-width: 2px;line-height: 5px;";
+						row.style="background-color: #D8E4BC ;border-width: 2px;line-height: 5px;";
 						row.style.fontFamily = 'Rockwell';
 						switch(i){
 							case 1:
@@ -2029,7 +1985,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									switch(j){
 										case 1:
 										cell.colSpan = 3;
-										cell.style = "background: #F2C230;font-weight: bold;border-color: Black;border-width: 2px;line-height: 20px;";
+										cell.style = "background: #D8E4BC;font-weight: bold;border-color: Black;border-width: 2px;line-height: 20px;";
 										cell.style.height = '20px';
 										cell.style.textAlign = "center";
 										cell.style.fontWeight = "900";
@@ -2038,12 +1994,12 @@ function addItemsToList(whatToProcess, dataToProcess)
 									}	
 									break;
 								default:
-									cell.style="background-color: #F2C230 ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;font-size:18px;";
+									cell.style="background-color: #D8E4BC ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;font-size:18px;";
 									cell.style.height = "39px"
 									
 									switch(j){
 										case 1:
-										cell.style="background-color: #F2C230 ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;font-size:18px;";
+										cell.style="background-color: #D8E4BC ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;font-size:18px;";
 										cell.style.width = "25%"
 										if(inn.fallsOfWickets.length > 0){
 											if(inn.fallsOfWickets[i-2] != null){
@@ -2083,7 +2039,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 										}
 										break;
 										case 2:
-										cell.style="background-color: #F2C230 ; font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;";
+										cell.style="background-color: #D8E4BC ; font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;";
 										cell.style.width = '60%';
 										
 										if(inn.fallsOfWickets.length >= 0){
@@ -2145,7 +2101,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 						//alert(boc.length)
 						for (var i = 1; i <= 11; i++){
 							row = tbody.insertRow(tbody.rows.length);
-							row.style="background-color: #F7D774 ; color: #0A1747 ;border-color: Black;border-width: 2px;line-height: 10px;";
+							row.style="background-color: #FABF8E ; color: #000000 ;border-color: Black;border-width: 2px;line-height: 10px;";
 							row.style.fontFamily = 'Rockwell';
 							switch(i){
 							case 1:
@@ -2157,14 +2113,14 @@ function addItemsToList(whatToProcess, dataToProcess)
 							}
 							for (var j=1;j<=count;j++){
 								cell = row.insertCell(j-1);
-								cell.style="background: #F7D774 ;color: #0A1747 ;";
+								cell.style="background: #FDD5B4 ;color: #000000 ;";
 								
 								switch(i){
 								case 1:
 									switch(j){
 										case 1:
 										cell.colSpan = 3;
-										cell.style = "background: #F7D774;font-weight: bold;color: #0A1747 ;border-color: Black;border-width: 2px;line-height: 20px;";
+										cell.style = "background: #FABF8E;font-weight: bold;color: #000000 ;border-color: Black;border-width: 2px;line-height: 20px;";
 										cell.style.height = '20px';
 										cell.style.textAlign = "center";
 										cell.style.fontWeight = "900";
@@ -2173,14 +2129,14 @@ function addItemsToList(whatToProcess, dataToProcess)
 									}	
 									break;
 								default:
-									cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
+									cell.style="color: #000000;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
 									cell.style.height = "38px"
 									switch(j){
 										case 1:
-											cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
+											cell.style="color: #000000;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
 											cell.style.width = '60%';
 											cell.style.lineHeight = '10px';
-											//cell.style="background-color: #F7D774 ; font-size:14px; font-weight: bold;";
+											//cell.style="background-color: #ffe49c ; font-size:14px; font-weight: bold;";
 											dataToProcess.setup.homeSquad.forEach(function(hs,index,arr){
 												//alert(hs.playerId)
 												if(inn.bowlingCard[i-2] != null){
@@ -2252,7 +2208,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 											});
 											break;
 										case 2:
-											cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
+											cell.style="color: #000000;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
 											cell.style.width = '20%';
 											if(inn.bowlingCard[i-2] != null){
 												cell.innerHTML = inn.bowlingCard[i-2].wickets + '-' + inn.bowlingCard[i-2].runs;
@@ -2263,9 +2219,9 @@ function addItemsToList(whatToProcess, dataToProcess)
 											
 											break;
 										case 3:
-											cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
+											cell.style="color: #000000;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
 											cell.style.width = '20%';
-											//cell.style="background-color: #F7D774 ; font-size:14px; font-weight: bold;text-align:center;";
+											//cell.style="background-color: #ffe49c ; font-size:14px; font-weight: bold;text-align:center;";
 											//cell.style.height = "43px"
 											//	cell.style.width = "50px"
 											if(inn.bowlingCard[i-2] != null){
@@ -2297,7 +2253,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 			for (var i = 1; i <= 12; i++){
 				row = tbody.insertRow(tbody.rows.length);
 				row.style.height = "10px"
-				row.style = "background: #0A1747 ; color: #F7D774";
+				row.style = "background: #0C0C0C ; color: #D7DCA2";
 				row.style.fontFamily = 'Rockwell';
 				switch(i){
 					case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11:
@@ -2323,7 +2279,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 												cell.innerHTML = dataToProcess.setup.awayTeam.teamName4;
 											}
 										}
-										cell.style = "background: #0A1747; color: #FFFFFF;font-size:22px;";
+										cell.style = "background: #0C0C0C; color: #ffffff;font-size:22px;";
 										cell.style.textAlign = "center";
 										cell.style.height = "15px"
 										cell.style.width = '35%';
@@ -2332,7 +2288,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									break;
 								case 2:
 									cell.innerHTML = 'FOW';
-									cell.style = "background: #0A1747; color: #FFFFFF;font-size:22px;";
+									cell.style = "background: #0C0C0C; color: #ffffff;font-size:22px;";
 									cell.style.textAlign = "center";
 									cell.style.height = "15px"
 									cell.style.width = '30%';
@@ -2348,7 +2304,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 											cell.innerHTML = dataToProcess.setup.awayTeam.teamName4;
 										}
 									}
-										cell.style = "background: #0A1747; color: #FFFFFF;font-size:22px;";
+										cell.style = "background: #0C0C0C; color: #ffffff;font-size:22px;";
 										cell.style.textAlign = "center";
 										cell.style.height = "15px"
 										cell.style.width = '35%';
@@ -2360,7 +2316,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 					case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11:
 						switch(j){
 							case 1:
-								cell.style = "background: #0A1747 ;color: #FFFFFF;font-size:18px;font-weight: bold;";
+								cell.style = "background: #0C0C0C ;color: #ffffff;font-size:18px;font-weight: bold;";
 								cell.style.textAlign = "center";
 								cell.style.width = "20px"
 								cell.style.height = "20px"
@@ -2375,7 +2331,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 									});
 								break;
 							case 2:
-								cell.style = "background: #0A1747;color: #FFFFFF;font-size:18px;font-weight: bold;";
+								cell.style = "background: #0C0C0C;color: #ffffff;font-size:18px;font-weight: bold;";
 								cell.style.width = "20px"
 								cell.style.height = "20px"
 								cell.style.textAlign = "center";
@@ -2383,7 +2339,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 								cell.innerHTML = i - 1;
 								break;
 							case 3:
-								cell.style = "background: #0A1747;color: #FFFFFF;font-size:18px;font-weight: bold;";
+								cell.style = "background: #0C0C0C;color: #ffffff;font-size:18px;font-weight: bold;";
 								cell.style.textAlign = "center";
 								cell.style.width = "20px"
 								cell.style.height = "20px"
@@ -2403,7 +2359,7 @@ function addItemsToList(whatToProcess, dataToProcess)
 						switch(j){
 						case 1:
 							cell.colSpan = 3;
-							cell.style = "background: #0A1747; color: #FFFFFF;font-size:32px; font-weight: bold;";
+							cell.style = "background: #0000FF; color: #FFFFFF;font-size:32px; font-weight: bold;";
 							cell.style.textAlign = "center";
 							cell.style.height = "15px"
 							cell.style.width = "20px"
@@ -2456,7 +2412,7 @@ function checkEmpty(inputBox,textToShow) {
 	document.getElementById(name + '-validation').style.display = 'none';
 	$(inputBox).css('border','');
 	if(document.getElementById(name).value.trim() == '') {
-		$(inputBox).css('border','#D42027 2px solid');
+		$(inputBox).css('border','#E11E26 2px solid');
 		document.getElementById(name + '-validation').innerHTML = textToShow + ' required';
 		document.getElementById(name + '-validation').style.display = '';
 		document.getElementById(name).focus({preventScroll:false});
