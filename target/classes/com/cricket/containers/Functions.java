@@ -21,7 +21,7 @@ public class Functions
 			for(Event evnt : events) {
 				if(evnt.getEventInningNumber() == inn_num) {
 					switch(evnt.getEventType()) {
-					case CricketUtil.DOT: case CricketUtil.BYE: case CricketUtil.LEG_BYE: case CricketUtil.LOG_WICKET:
+					case CricketUtil.DOT:  case CricketUtil.BYE:  case CricketUtil.LEG_BYE:  case CricketUtil.LOG_WICKET:
 						countBalls++;
 						break;
 					}

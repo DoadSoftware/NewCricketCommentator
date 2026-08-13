@@ -156,7 +156,7 @@ html, body{
    --------------------------------------------------------------------- */
 .fb-grid{
   display:grid;
-  grid-template-columns: 2.1fr 0.7fr 1fr 1.3fr;
+  grid-template-columns: 2.05fr 0.65fr 1.15fr 1.3fr;
   gap: var(--board-gap);
   grid-template-areas:
     "battable crr   score panel"
@@ -333,36 +333,113 @@ html, body{
 }
 
 /* ---------------------------------------------------------------------
-   Last wicket + since last boundary (combined info row)
+   Last wicket + target + since last boundary
    --------------------------------------------------------------------- */
-.fb-infobar{
-  background: var(--spl-navy-900);
-  border:2px solid #000;
-  display:flex; align-items:center;
-  font-family: var(--spl-font-numeric);
-  font-weight:700;
-  font-size:clamp(22px,2.2vw,26px);
-  height:70px;      /* fixed — change this to resize the bar, independent of font-size below */
-  overflow:hidden;
-}
-.fb-infobar .fb-lw{
-  flex:1 1 65%;
-  padding:6px 12px;
-  color: var(--spl-gold-light);
-  white-space:nowrap; overflow:hidden; text-overflow:ellipsis;
-  min-width:0;
-}
-.fb-infobar .fb-lw-balls{ opacity:.8; font-size:.85em; }
-.fb-infobar .fb-sb{
-  flex:0 0 auto;
-  padding:6px 12px;
-  background: var(--spl-gray-500);
-  color:#fff;
-  border-left:2px solid #000;
-  white-space:nowrap;
-}
-.fb-info-lab{ font-family: var(--spl-font-label); font-weight:600; font-size:.78em; opacity:.85; margin-right:4px; }
 
+.fb-infobar{
+    background: var(--spl-navy-900);
+    border: 2px solid #000;
+    display: grid;
+    grid-template-columns: 1fr auto;
+    align-items: stretch;
+    font-family: var(--spl-font-numeric);
+    font-weight: 700;
+    font-size: clamp(27px,2.7vw,30px);
+    height: 70px;
+    overflow: hidden;
+    box-sizing: border-box;
+}
+
+
+/* ---------------------------------------------------------
+   LAST WICKET
+   --------------------------------------------------------- */
+
+.fb-infobar .fb-lw{
+    min-width: 0;
+    display: flex;
+    gap: 10px;
+    align-items: center;
+    padding: 6px 12px;
+    color: var(--spl-gold-light);
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+}
+
+
+/* ---------------------------------------------------------
+   RIGHT SIDE
+   Contains TARGET + SINCE LAST B'DRY
+   --------------------------------------------------------- */
+
+.fb-info-right{
+    display: flex;
+    align-items: stretch;
+    justify-content: flex-end;
+    height: 100%;
+}
+
+
+/* ---------------------------------------------------------
+   TARGET
+   --------------------------------------------------------- */
+
+.fb-target-info{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 8px;
+    min-width: 150px;
+    padding: 6px 14px;
+    background: var(--spl-gold-400);
+    color: #000;
+    border-left: 2px solid #000;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+.fb-target-info .fb-info-lab{
+    color: var(--spl-navy-900);
+}
+
+.fb-target-info b{
+    font-family: var(--spl-font-display);
+    font-size: 1.15em;
+    font-weight: 800;
+    color: var(--spl-navy-900);
+}
+
+/* ---------------------------------------------------------
+   SINCE LAST BOUNDARY
+   --------------------------------------------------------- */
+
+.fb-infobar .fb-sb{
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    gap: 6px;
+    min-width: 390px;
+    padding: 6px 14px;
+    background: var(--spl-gray-500);
+    color: #fff;
+    border-left: 2px solid #000;
+    white-space: nowrap;
+    box-sizing: border-box;
+}
+
+
+/* ---------------------------------------------------------
+   INFO LABEL
+   --------------------------------------------------------- */
+
+.fb-info-lab{
+    font-family: var(--spl-font-label);
+
+    font-weight: 700;
+
+    letter-spacing: .3px;
+}
 /* ---------------------------------------------------------------------
    Last ball speed / contextual box (phases / target / toss)
    --------------------------------------------------------------------- */
@@ -376,21 +453,142 @@ html, body{
 .fb-speed .fb-label{ font-size:clamp(30px,3vw,34px); letter-spacing:.5px; }
 .fb-speed .fb-val{ font-family: var(--spl-font-display); font-size:clamp(38px,4.2vw,48px); font-weight:700; }
 
-.fb-context{
-  background: var(--spl-navy-900);
-  border:2px solid #000;
-  display:flex; flex-direction:column;
-  overflow:hidden;
-}
-.fb-ph-title{
-  background: var(--spl-navy-800); color:#fff;
-  text-align:center; font-family: var(--spl-font-display); font-weight:600;
-  padding:3px; font-size:clamp(14px,1.4vw,18px); letter-spacing:1px;
-}
-.fb-context table{ width:100%; border-collapse:collapse; font-family: var(--spl-font-numeric); font-size:clamp(11px,1.1vw,15px); }
-.fb-context th{ background: var(--spl-gold-400); color:var(--spl-text-dark); font-weight:700; padding:3px; }
-.fb-context td{ text-align:center; padding:2px; color: var(--spl-gold-light); font-weight:700; border-top:1px solid #1c2c66; }
+/* ==========================================================
+   SCORE BY PHASES
+   ========================================================== */
 
+.fb-context{
+    width: 100%;
+    height: 100%;
+    box-sizing: border-box;
+    display: flex;
+    flex-direction: column;
+    overflow: hidden;
+}
+
+
+/* ---------- TITLE ---------- */
+
+.fb-ph-title{
+    flex: 0 0 38px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--spl-navy-800);
+    color: #fff;
+
+    font-family: var(--spl-font-display);
+    font-size: 24px;
+    font-weight: 800;
+
+    line-height: 1;
+    text-align: center;
+
+    padding: 4px 6px;
+
+    box-sizing: border-box;
+}
+
+
+/* ---------- TABLE ---------- */
+
+.fb-context table{
+    width: 100%;
+    height: calc(100% - 38px);
+
+    border-collapse: collapse;
+    border-spacing: 0;
+
+    table-layout: fixed;
+
+    background: var(--spl-navy-900);
+}
+
+
+/* ---------- HEADER ---------- */
+
+.fb-context th{
+    background: var(--spl-gold-400);
+   color: #11183F;
+
+    font-family: var(--spl-font-label);
+    font-size: 17px;
+    font-weight: 800;
+
+    height: 34px;
+
+    padding: 5px 6px;
+
+    line-height: 1;
+
+    text-align: center;
+
+    border: 1px solid #000;
+
+    box-sizing: border-box;
+}
+
+
+/* ---------- DATA ROWS ---------- */
+
+.fb-context td{
+    background: var(--spl-navy-900);
+    color: #fff;
+
+    font-family: var(--spl-font-numeric);
+    font-size: 21px;
+    font-weight: 800;
+
+    height: 42px;
+
+    padding: 7px 5px;
+
+    line-height: 1;
+
+    text-align: center;
+
+    border: 1px solid #000;
+
+    box-sizing: border-box;
+}
+
+
+/* ---------- OVERS COLUMN ---------- */
+
+.fb-context th:first-child,
+.fb-context td:first-child{
+    width: 33%;
+
+    font-family: var(--spl-font-label);
+}
+
+
+/* ---------- TEAM COLUMNS ---------- */
+
+.fb-context th:not(:first-child),
+.fb-context td:not(:first-child){
+    width: 33.5%;
+}
+
+
+/* ---------- OVERS VALUES ---------- */
+
+.fb-context td:first-child{
+    color: var(--spl-gold-light);
+
+    font-size: 18px;
+    font-weight: 800;
+}
+
+
+/* ---------- SCORE VALUES ---------- */
+
+.fb-context td:not(:first-child){
+    font-size: 21px;
+    font-weight: 800;
+}
 .fb-context-msg{
   align-items:center; justify-content:center; text-align:center;
   padding:10px 14px;
@@ -472,28 +670,44 @@ html, body{
 .fb-thisover{
   background: var(--spl-navy-900);
   border:2px solid #000;
-  display:flex; align-items:center; gap:12px;
+  display:flex; align-items:center; gap:45px;
   padding:6px 12px;
   flex-wrap:nowrap;      /* was wrap — a wide/malformed chip was wrapping to a 2nd line and getting clipped by the fixed height */
   min-height:70px;
   overflow:visible;      /* was hidden — don't let bar content get clipped while chasing this data bug */
 }
 .fb-balls{
-  overflow:hidden;
-  text-overflow:ellipsis;
-  white-space:nowrap; display:flex; gap:4px; flex-wrap:wrap;
+    overflow: visible;
+    white-space: nowrap;
+    display: flex;
+    gap: 30px;
+    flex-wrap: nowrap;
+    align-items: center;
+}
+
+.fb-ball{
+    min-width: 38px;
+    height: 38px;
+    padding: 0 8px;
+
+    display: flex;
+    align-items: center;
+    justify-content: center;
+
+    background: var(--spl-navy-800);
+    color: #fff;
+
+    border: 2px solid var(--spl-gold-400);
+    border-radius: 5px;
+
+    font-family: var(--spl-font-numeric);
+    font-weight: 700;
+    font-size: 30px;
+    line-height: 1;
+    box-sizing: border-box;
 }
 .fb-to-label{ font-family: var(--spl-font-numeric); font-weight:700; font-size:clamp(33px,3.3vw,37px); color:#fff; }
 .fb-to-runs{ font-family: var(--spl-font-display); font-weight:600; font-size:clamp(33px,3.3vw,37px); color: var(--spl-gold-light); flex:1; }
-.fb-ball{
-  min-width:28px; height:28px; padding:0 5px;
-  display:flex; align-items:center; justify-content:center;
-  background: var(--spl-navy-800); color:#fff;
-  border:1px solid var(--spl-gold-400);
-  border-radius:5px;
-  font-family: var(--spl-font-numeric);
-  font-weight:700; font-size:clamp(30px,3vw,33px);
-}
 .fb-ball.wicket{ background:var(--spl-red-600); border-color:#fff; }
 .fb-ball.boundary{ background:var(--spl-gold-400); color:var(--spl-text-dark); }
 .fb-ball.extra{ background:var(--spl-navy-800); border-color:var(--spl-cyan-400); color:var(--spl-cyan-400); }
@@ -525,7 +739,7 @@ html, body{
   border:2px solid #000;
 }
 .fb-stage table{ width:100%; border-collapse:collapse; font-family: var(--spl-font-numeric); font-size:clamp(21px,2.05vw,25px); }
-.fb-stage th{ background: var(--spl-cyan-400); color:var(--spl-text-dark); padding:4px 6px; font-weight:700; font-size:1.3em; }
+.fb-stage th{ text-align:center; background: var(--spl-cyan-400); color:var(--spl-text-dark); padding:4px 6px; font-weight:700; font-size:1.3em; }
 .fb-stage td{ text-align:center; padding:5px 3px; font-weight:700; border-top:1px solid #1c2c66; }
 .fb-stage td.fb-mid-label{ background: var(--spl-navy-800); color:var(--spl-gold-light); font-weight:600; font-family: var(--spl-font-label); font-size:.75em; }
 
@@ -559,6 +773,157 @@ html, body{
   font-size:clamp(13px,1.5vw,20px);
   font-weight:600; color: var(--spl-gold-400);
   line-height:1.4;
+}
+
+/* ==========================================================
+   SECOND INNINGS EQUATION PANEL
+   ========================================================== */
+
+.fb-equation-panel{
+    flex: 1;
+
+    width: 100%;
+
+    display: flex;
+    flex-direction: column;
+
+    align-items: center;
+    justify-content: center;
+
+    text-align: center;
+
+    background: var(--spl-navy-900);
+
+    overflow: hidden;
+
+    box-sizing: border-box;
+
+    padding: 8px 10px;
+}
+
+.fb-equation-team{
+    width: 100%;
+    text-align: center;
+   color: var(--spl-gold-light);
+    font-family: var(--spl-font-display);
+    font-size: clamp(22px, 2.2vw, 30px);
+    font-weight: 700;
+    line-height: 1;
+    text-transform: uppercase;
+    margin-bottom: 8px;
+}
+
+.fb-equation-team span{
+    color: var(--spl-gold-light);
+
+    font-size: 0.95em;
+}
+
+.fb-equation-runs{
+    display: flex;
+
+    align-items: baseline;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    width: 100%;
+
+    margin-bottom: 5px;
+}
+
+.fb-equation-number{
+    display: inline-flex;
+
+    align-items: center;
+    justify-content: center;
+
+    min-width: 85px;
+
+    padding: 2px 12px;
+
+    color: #ffffff;
+
+    background: var(--spl-navy-800);
+
+    border: 2px solid var(--spl-gold-400);
+
+    font-family: var(--spl-font-numeric);
+
+    font-size: clamp(50px, 5vw, 72px);
+
+    font-weight: 800;
+
+    line-height: 0.95;
+
+    text-align: center;
+
+    box-sizing: border-box;
+}
+
+.fb-equation-small{
+    color: var(--spl-gold-light);
+
+    font-family: var(--spl-font-display);
+
+    font-size: clamp(27px, 2.6vw, 33px);
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    white-space: nowrap;
+}
+
+.fb-equation-middle{
+    width: 100%;
+
+    text-align: center;
+
+    color: #ffffff;
+
+    font-family: var(--spl-font-display);
+
+    font-size: clamp(22px, 2.2vw, 30px);
+
+    font-weight: 700;
+
+    line-height: 1;
+
+    margin: 5px 0 7px;
+
+    letter-spacing: 0.5px;
+}
+
+
+.fb-equation-balls{
+    display: flex;
+
+    align-items: baseline;
+
+    justify-content: center;
+
+    gap: 8px;
+
+    width: 100%;
+}
+
+
+.fb-equation-fallback{
+    color: #ffffff;
+
+    font-family: var(--spl-font-display);
+
+    font-size: clamp(18px, 1.8vw, 26px);
+
+    font-weight: 700;
+
+    text-align: center;
+
+    line-height: 1.3;
+
+    max-width: 95%;
 }
 
 /* ---------------------------------------------------------------------
@@ -657,34 +1022,106 @@ html, body{
 	.fb-side-empty{ padding:10px 12px; font-family: var(--spl-font-label); font-size:12px; color:#7280a3; text-align:center; font-style:italic; }
 	
 	/* Header row */
+/* ==========================================================
+   BOWLING SCORECARD HEADER
+   ========================================================== */
+
 .fb-side-sub-head{
-  display: grid;
-  grid-template-columns: 1fr 50px 55px 60px 40px; /* name + stats */
-  align-items: center;
+    display: grid;
+ 	font-size: 22px;   /* was 15px */
+    font-weight: 800;
+    grid-template-columns: 1fr 70px 60px 60px 75px;
 
-  background: var(--spl-navy-800);
-  color: var(--spl-gold-light);
+    align-items: center;
 
-  font-family: var(--spl-font-label);
-  font-size: clamp(12px,.95vw,14px);
-  font-weight: 700;
+    background: var(--spl-navy-800);
+    color: var(--spl-gold-light);
 
-  padding: 4px 12px;
+    font-family: var(--spl-font-label);
+    font-size: 15px;
+    font-weight: 800;
+
+    padding: 5px 12px;
+
+    box-sizing: border-box;
+}
+
+
+/* Header alignment */
+
+.fb-side-sub-head span{
+    text-align: right;
+    white-space: nowrap;
+}
+
+.fb-side-sub-head span:first-child{
+    text-align: left;
 }
 
 /* Bowling rows */
+/* ==========================================================
+   BOWLING SCORECARD ROW
+   ========================================================== */
+
 .fb-side-sub{
-  display: grid;
-  grid-template-columns: 1fr 90px 30px 20px 10px; /* SAME as header */
-  align-items: center;
+    display: grid;
+	font-size: 22px;   /* was 17px */
+    font-weight: 700;
+    /* MUST MATCH .fb-side-sub-head EXACTLY */
+    grid-template-columns: 1fr 70px 60px 60px 75px;
 
-  padding: 5px 12px;
-  font-family: var(--spl-font-numeric);
-  font-size: clamp(11px,1.1vw,15px);
-  font-weight: 600;
+    align-items: center;
 
-  color: #fff;
-  border-bottom: 1px solid #182a63;
+    padding: 6px 12px;
+
+    font-family: var(--spl-font-numeric);
+    font-size: 17px;
+    font-weight: 700;
+
+    color: #fff;
+
+    border-bottom: 1px solid #182a63;
+
+    box-sizing: border-box;
+}
+
+
+/* ==========================================================
+   PLAYER NAME
+   ========================================================== */
+
+.fb-bowl-name{
+    text-align: left;
+
+    white-space: nowrap;
+    overflow: hidden;
+    text-overflow: ellipsis;
+
+    padding-right: 8px;
+}
+
+
+/* ==========================================================
+   FIG / OVR / DOTS / ECON
+   ========================================================== */
+
+.fb-bowl-fig,
+.fb-bowl-ovr,
+.fb-bowl-dots,
+.fb-bowl-econ{
+    text-align: right;
+
+    white-space: nowrap;
+}
+
+
+/* ==========================================================
+   CURRENT BOWLER
+   ========================================================== */
+
+.fb-side-sub.fb-current-bowler{
+    background: rgba(242,194,48,.14);
+    color: var(--spl-gold-light);
 }
 
 /* Individual columns alignment */

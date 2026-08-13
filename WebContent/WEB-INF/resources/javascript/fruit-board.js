@@ -211,8 +211,24 @@ function renderFruitBoard(dataToProcess){
 	console.log('inningStats:', inn.inningStats);
 	if(!inn){ return; }
 	var setup = dataToProcess.setup;
+
+	/* ---------- teams in FIXED innings order ---------- */
+	var firstInning = fb_inningByNumber(dataToProcess, 1);
+	var secondInning = fb_inningByNumber(dataToProcess, 2);
+
+	var firstInningsTeamName = firstInning
+	    ? fb_teamName(dataToProcess, firstInning.battingTeamId)
+	    : '';
+
+	var secondInningsTeamName = secondInning
+	    ? fb_teamName(dataToProcess, secondInning.battingTeamId)
+	    : '';
+
+	/* Current batting/bowling teams are still used by the rest of the board */
 	var battingTeamName = fb_teamName(dataToProcess, inn.battingTeamId);
-	var bowlingTeamId = (inn.battingTeamId == setup.homeTeamId) ? setup.awayTeamId : setup.homeTeamId;
+	var bowlingTeamId = (inn.battingTeamId == setup.homeTeamId)
+	                    ? setup.awayTeamId
+	                    : setup.homeTeamId;
 	var bowlingTeamName = fb_teamName(dataToProcess, bowlingTeamId);
 	var oversStat = fb_statVal(inn, 'OVER' + inn.inningNumber);
 	if(!oversStat){
@@ -255,7 +271,7 @@ function renderFruitBoard(dataToProcess){
 			var pShip = '0(0)';
 			if(fb_arr(inn.partnerships).length > 0){
 				var last = inn.partnerships[inn.partnerships.length-1];
-				pShip = (bc.playerId == last.firstBatterNo)
+				pShip = (bc.playerId == last.no)
 					? fb_safe(last.firstBatterRuns,'0') + '(' + fb_safe(last.firstBatterBalls,'0') + ')'
 					: fb_safe(last.secondBatterRuns,'0') + '(' + fb_safe(last.secondBatterBalls,'0') + ')';
 			}
@@ -311,7 +327,7 @@ function renderFruitBoard(dataToProcess){
 		fb_arr(inn.battingCard).forEach(function(b){ if(b.playerId == lastFow.fowPlayerID){ outBc = b; } });
 		if(outBc){
 			lastWicketHtml = fb_safe(outBc.player && outBc.player.ticker_name,'-') + ' &nbsp; ' + fb_safe(outBc.howOutText,'') +
-				' &nbsp; <b>' + fb_safe(outBc.runs,'0') + '</b> <span class="fb-lw-balls">' + fb_safe(outBc.balls,'0') + '</span>';
+			    ' &nbsp; <b>' + fb_safe(outBc.runs,'0') + '</b> <span class="fb-lw-balls">(' + fb_safe(outBc.balls,'0') + ')</span>';
 		}
 	}
 
@@ -341,69 +357,151 @@ function renderFruitBoard(dataToProcess){
 	var ballChips = ballsRaw ? ballsRaw.split(',').map(fb_ballChip).join('') : '';
 	var lastBoundaryBalls = fb_statVal(inn,'BOUNDARY');
 
-	/* ---------- contextual middle box: phases (inns 1) / target (inns 2) / toss (pre-match) ---------- */
-	var ballsPerOver = parseInt(setup.ballsPerOver, 10) || 6;
+	/* ---------- phase wise score ---------- */
 
-	var totalBallsBowled =
-		(parseInt(fb_safe(oversStat,'0').split('.')[0],10) || 0) * ballsPerOver
-		+ (parseInt(fb_safe(oversStat,'0').split('.')[1],10) || 0);
 	var contextHtml = '';
-	var tossText = fb_statVal(inn,'TOSS');
-	if(inn.inningNumber == 1 && totalBallsBowled == 0 && tossText){
-		contextHtml = '<div class="fb-context fb-context-msg"><span>' + fb_esc(tossText).toUpperCase() + '</span></div>';
-	} else if(inn.inningNumber == 2 && totalBallsBowled < 36){
-		var target = 0;
-		var firstInn = fb_inningByNumber(dataToProcess, 1);
-		if(firstInn){ target = (parseInt(fb_safe(firstInn.totalRuns,'0'),10) || 0) + 1; }
-		var statusText = fb_statVal(inn,'INNING_STATUS');
-		contextHtml = '<div class="fb-context fb-context-target">' +
-			'<div class="fb-target-lab">TARGET</div><div class="fb-target-val">' + target + '</div>' +
-			(statusText ? '<div class="fb-target-status">' + fb_esc(statusText).toUpperCase() + '</div>' : '') +
-			'</div>';
+
+	if(inn.inningNumber == 1){
+
+	    contextHtml =
+	        '<div class="fb-context">' +
+	        '<div class="fb-ph-title">SCORE BY PHASES</div>' +
+	        '<table>' +
+	        '<tr>' +
+	        '<th>OVERS</th>' +
+	        '<th>' + fb_esc(firstInningsTeamName) + '</th>' +
+	        '</tr>' +
+
+	        '<tr>' +
+	        '<td>1-6</td>' +
+	        '<td>' + fb_safe(fb_statVal(firstInning,'PHASE1'),'-') + '</td>' +
+	        '</tr>' +
+
+	        '<tr>' +
+	        '<td>7-15</td>' +
+	        '<td>' + fb_safe(fb_statVal(firstInning,'PHASE2'),'-') + '</td>' +
+	        '</tr>' +
+
+	        '<tr>' +
+	        '<td>16-20</td>' +
+	        '<td>' + fb_safe(fb_statVal(firstInning,'PHASE3'),'-') + '</td>' +
+	        '</tr>' +
+
+	        '</table>' +
+	        '</div>';
+
 	} else {
-		/* both teams shown side-by-side, matching the reference broadcast graphic —
-		   opponent column reads from oppInning and degrades to '-' before their innings starts */
-		contextHtml = '<div class="fb-context"><div class="fb-ph-title">SCORE BY PHASES</div><table>' +
-			'<tr><th>OVERS</th><th>' + fb_esc(battingTeamName) + '</th><th>' + fb_esc(bowlingTeamName) + '</th></tr>' +
-			'<tr><td>1-6</td><td>' + fb_safe(fb_statVal(inn,'PHASE1'),'-') + '</td><td>' + fb_safe(fb_statVal(oppInning,'PHASE1'),'-') + '</td></tr>' +
-			'<tr><td>7-15</td><td>' + fb_safe(fb_statVal(inn,'PHASE2'),'-') + '</td><td>' + fb_safe(fb_statVal(oppInning,'PHASE2'),'-') + '</td></tr>' +
-			'<tr><td>16-20</td><td>' + fb_safe(fb_statVal(inn,'PHASE3'),'-') + '</td><td>' + fb_safe(fb_statVal(oppInning,'PHASE3'),'-') + '</td></tr>' +
-			'</table></div>';
+
+	    contextHtml =
+	        '<div class="fb-context">' +
+	        '<div class="fb-ph-title">SCORE BY PHASES</div>' +
+	        '<table>' +
+
+	        '<tr>' +
+	        '<th>OVERS</th>' +
+	        '<th>' + fb_esc(firstInningsTeamName) + '</th>' +
+	        '<th>' + fb_esc(secondInningsTeamName) + '</th>' +
+	        '</tr>' +
+
+	        '<tr>' +
+	        '<td>1-6</td>' +
+	        '<td>' + fb_safe(fb_statVal(firstInning,'PHASE1'),'-') + '</td>' +
+	        '<td>' + fb_safe(fb_statVal(secondInning,'PHASE1'),'-') + '</td>' +
+	        '</tr>' +
+
+	        '<tr>' +
+	        '<td>7-15</td>' +
+	        '<td>' + fb_safe(fb_statVal(firstInning,'PHASE2'),'-') + '</td>' +
+	        '<td>' + fb_safe(fb_statVal(secondInning,'PHASE2'),'-') + '</td>' +
+	        '</tr>' +
+
+	        '<tr>' +
+	        '<td>16-20</td>' +
+	        '<td>' + fb_safe(fb_statVal(firstInning,'PHASE3'),'-') + '</td>' +
+	        '<td>' + fb_safe(fb_statVal(secondInning,'PHASE3'),'-') + '</td>' +
+	        '</tr>' +
+
+	        '</table>' +
+	        '</div>';
 	}
 
-	/* ---------- bottom-right contextual panel: projected scores / chase need / result ---------- */
-	/* ---------- bottom-right contextual panel: projected scores ---------- */
+	var recentSummary = fb_safe(fb_statVal(inn, 'LAST_30_BALLS'), '');
+	var bottomRightHtml = '<div class="fb-bpanel">';
 
-	var psRaw = fb_statVal(inn, 'PS');
-	var projRows = [];
-
-	if(psRaw){
-		var arr = psRaw.split(',');
-		for(var i = 0; i + 1 < arr.length; i += 2){
-			projRows.push({score: arr[i],rate: arr[i + 1]
-			});
-		}
-	}
-
-	var recentSummary = fb_safe(fb_statVal(inn,'LAST_30_BALLS'),'');
-	var bottomRightHtml ='<div class="fb-bpanel">';
 	if(recentSummary){
-		bottomRightHtml +='<div class="fb-bpanel-title">' +fb_esc(recentSummary).toUpperCase() +'</div>';
+	    bottomRightHtml += '<div class="fb-bpanel-title">' +
+	        fb_esc(recentSummary).toUpperCase() +
+	        '</div>';
 	}
-	bottomRightHtml += '<div class="fb-bpanel-subtitle">PROJECTED SCORES</div>';
 
-	bottomRightHtml += '<table>';
-	if(projRows.length){
-		projRows.forEach(function(r){
-		bottomRightHtml += '<tr>' + '<td class="fb-rate">@' + fb_esc(r.rate) + ' RPO</td>' + '<td class="fb-projval">' + fb_esc(r.score) + '</td>' + '</tr>'; }); 
-	} else { 
-		bottomRightHtml += '<tr>' + '<td class="fb-rate">@CRR</td>' + '<td class="fb-projval">-</td>' + '</tr>';
-	} 
-	bottomRightHtml += '</table></div>';
+	/* ==========================================================
+	   INNINGS 1 -> PROJECTED SCORES
+	   INNINGS 2 -> EQUATION / CHASE STATUS
+	   ========================================================== */
+
+	if(inn.inningNumber == 1){
+	    var psRaw = fb_statVal(inn, 'PS');
+	    var projRows = [];
+	    if(psRaw){
+	        var arr = psRaw.split(',');
+	        for(var i = 0; i + 1 < arr.length; i += 2){
+	            projRows.push({
+	                score: arr[i],
+	                rate: arr[i + 1]
+	            });
+	        }
+	    }
+	    bottomRightHtml += '<div class="fb-bpanel-subtitle">PROJECTED SCORES</div>';
+	    bottomRightHtml += '<table>';
+
+	    if(projRows.length){
+	        projRows.forEach(function(r){
+	            bottomRightHtml += '<tr>' + '<td class="fb-rate">@' + fb_esc(r.score) + ' RPO' + '</td>' + '<td class="fb-projval">' + fb_esc(r.rate) + '</td>' + '</tr>';
+			});
+	    } else {
+	        bottomRightHtml += '<tr>' +  '<td class="fb-rate">@CRR</td>' +  '<td class="fb-projval">-</td>' + '</tr>'; 
+	    } 
+	    bottomRightHtml += '</table>'; 
+		
+	} else {
+	    var equation = fb_safe(fb_statVal(inn, 'EQUATION'),''
+	    );
+	    if(equation){
+	        var equationText = equation.toUpperCase().trim();
+
+	        var equationMatch = equationText.match(
+	            /^(.+?)\s+NEED\s+(\d+)\s+RUNS\s+TO\s+WIN\s+FROM\s+(\d+)\s+BALLS(?:\s*(\(DLS\)))?$/i
+	        );
+
+	        if(equationMatch){
+
+	            var equationTeam = equationMatch[1].trim();
+	            var equationRuns = equationMatch[2].trim();
+	            var equationBalls = equationMatch[3].trim();
+	            var equationDls = equationMatch[4] ? equationMatch[4].trim() : '';
+
+	            bottomRightHtml +=
+	                '<div class="fb-equation-panel">' +'<div class="fb-equation-team">' +fb_esc(equationTeam)  +'</div>' +
+	                    '<div class="fb-equation-runs">' + '<span class="fb-equation-small">' + 'NEED' + '</span>' +'<span class="fb-equation-number">' +fb_esc(equationRuns) + '</span>' + '<span class="fb-equation-small">' + 'RUNS' + '</span>' +'</div>' +
+	                    '<div class="fb-equation-balls">' + '<span class="fb-equation-small">' + 'FROM' + '</span>' + '<span class="fb-equation-number">' + fb_esc(equationBalls) + '</span>' + '<span class="fb-equation-small">' + 'BALLS' + (equationDls ? ' ' + fb_esc(equationDls) : '') +
+	                        '</span>' + '</div>' + '</div>';
+	        } else {
+	            bottomRightHtml += '<div class="fb-equation-panel">' +'<div class="fb-equation-fallback">' +fb_esc(equationText) + '</div>' + '</div>';
+	        }
+	    } else {
+	        bottomRightHtml +='<div class="fb-equation-panel">' + '<div class="fb-equation-fallback">-</div>' + '</div>';
+	    }
+	}
+	bottomRightHtml += '</div>';
 
 	/* ---------- stage stats (fours/sixes/at this stage/dots/reviews) ---------- */
-	var battingScoreLabel = battingTeamName + ' (' + fb_safe(inn.totalRuns,'0') + '-' + fb_safe(inn.totalWickets,'0') + ')';
-	var bowlingScoreLabel = bowlingTeamName + ' (' + (oppInning ? (fb_safe(oppInning.totalRuns,'0') + '-' + fb_safe(oppInning.totalWickets,'0')) : '0-0') + ')';
+	var firstInningsScoreLabel = firstInning
+	    ? firstInningsTeamName + ' (' + fb_safe(firstInning.totalRuns,'0') + '-' + fb_safe(firstInning.totalWickets,'0') + ')'
+	    : '';
+
+	var secondInningsScoreLabel = secondInning
+	    ? secondInningsTeamName + ' (' + fb_safe(secondInning.totalRuns,'0') + '-' + fb_safe(secondInning.totalWickets,'0') + ')'
+	    : '';
 
 	/* ---------- squad panel: full batting scorecard + full bowling scorecard ---------- */
 	var battingSquad = (inn.battingTeamId == setup.homeTeamId) ? setup.homeSquad : setup.awaySquad;
@@ -418,14 +516,29 @@ function renderFruitBoard(dataToProcess){
 			return;
 		}
 		var isOut = (bc.status == 'OUT');
-		var isOnStrike = bc.status=='NOT OUT' && bc.onStrike=='YES';
-		var isNonStrike = bc.status=='NOT OUT' && bc.onStrike=='NO';
-		var marker = (isOnStrike || isNonStrike) ? ' <i class="fas fa-pen"></i>' : '';
-		var dismissalLine = isOut ? ('<span class="fb-p-dismiss">' + fb_esc(bc.howOutText) + '</span>') : '';
-		var rb = (isOut || isOnStrike || isNonStrike) ? (fb_safe(bc.runs,'0') + '&nbsp;&nbsp;' + fb_safe(bc.balls,'0')) : '';
-		battingCardHtml += '<div class="fb-side-player' + ((isOnStrike||isNonStrike)?' fb-current':'') + (isOut?' fb-out-row':'') + '">' +
-			'<span class="fb-p-block"><span class="fb-p-name">' + fb_esc(p.ticker_name) + '  ' + dismissalLine + marker + '</span>'  + '</span>' +
-			'<span class="fb-runs-balls">' + rb + '</span></div>';
+		var isOnStrike = bc.status == 'NOT OUT' && bc.onStrike == 'YES';
+		var isNonStrike = bc.status == 'NOT OUT' && bc.onStrike == 'NO';
+		var isToBat = (bc.status == 'TO BAT');
+		var dismissalLine = isOut ? ('<span class="fb-p-dismiss">' + fb_esc(bc.howOutText) +'</span>') : '';
+		var statusLine = '';
+		if(isOut){
+		    /* Keep OUT exactly as it is */
+		    statusLine = dismissalLine;
+		} else if(isOnStrike || isNonStrike){
+		    /* Current batsmen */
+		    statusLine = '<span class="fb-p-dismiss">NOT OUT</span>';
+		} else if(isToBat){
+		    /* Player has not come to bat yet */
+		    statusLine = '<span class="fb-p-dismiss">TO BAT</span>';
+		}
+		var rb = '';
+
+		if(isOut || isOnStrike || isNonStrike){
+		    rb = fb_safe(bc.runs,'0') + '&nbsp;&nbsp;(' + fb_safe(bc.balls,'0') +')';}
+
+		battingCardHtml += '<div class="fb-side-player' + ((isOnStrike || isNonStrike) ? ' fb-current' : '') + (isOut ? ' fb-out-row' : '') 
+				+ '">' + '<span class="fb-p-block">' + '<span class="fb-p-name">' + fb_esc(p.ticker_name) 
+				+ '  ' + statusLine + '</span>' + '</span>' + '<span class="fb-runs-balls">' +rb +  '</span>' + '</div>';
 	});
 
 	var bowlingCardHtml = '';
@@ -434,11 +547,31 @@ function renderFruitBoard(dataToProcess){
 		fb_arr(inn.bowlingCard).forEach(function(b){ if(b.playerId == p.playerId){ boc = b; } });
 		if(!boc){ return; } /* only list bowlers who have actually bowled, matching reference */
 		var isCurrent = (boc.status == 'CURRENTBOWLER');
-		var marker = isCurrent ? ' <i class="fas fa-circle"></i>' : '';
-		bowlingCardHtml += '<div class="fb-side-sub' + (isCurrent?' fb-current-bowler':'') + '">' +
-			'<span>' + fb_esc(p.ticker_name) + marker + '</span>' +
-			'<span class="fb-bowl-figs">' + fb_safe(boc.wickets,'0') + '-' + fb_safe(boc.runs,'0') + '&nbsp;&nbsp;' + fb_safe(boc.overs,'0') + '.' + fb_safe(boc.balls,'0') + '&nbsp;&nbsp;' + fb_safe(boc.dots,'0') + '&nbsp;&nbsp;' + ((boc.economyRate==0||boc.economyRate==undefined)?'-':boc.economyRate) + '</span>' +
-			'</div>';
+		bowlingCardHtml += '<div class="fb-side-sub' + (isCurrent ? ' fb-current-bowler' : '') + '">' +
+
+		    '<span class="fb-bowl-name">' +
+		        fb_esc(p.ticker_name) +
+		    '</span>' +
+
+		    '<span class="fb-bowl-fig">' +
+		        fb_safe(boc.wickets,'0') + '-' + fb_safe(boc.runs,'0') +
+		    '</span>' +
+
+		    '<span class="fb-bowl-ovr">' +
+		        fb_safe(boc.overs,'0') + '.' + fb_safe(boc.balls,'0') +
+		    '</span>' +
+
+		    '<span class="fb-bowl-dots">' +
+		        fb_safe(boc.dots,'0') +
+		    '</span>' +
+
+		    '<span class="fb-bowl-econ">' +
+		        ((boc.economyRate == 0 || boc.economyRate == undefined)
+		            ? '-'
+		            : boc.economyRate) +
+		    '</span>' +
+
+		'</div>';
 	});
 
 	/* ---------- fall of wickets ---------- */
@@ -461,7 +594,8 @@ function renderFruitBoard(dataToProcess){
 	html += '  <div class="fb-logo"><span class="fb-logo-mark"><i class="fas fa-play"></i></span> Design on a Dime</div>';
 	html += '  <div class="fb-title">';
 	html += '    <div class="fb-tourney">' + fb_esc(setup.tournament).toUpperCase() + '</div>';
-	html += '    <div class="fb-match">' + fb_esc(setup.matchIdent).toUpperCase() + ' : ' + fb_esc(setup.homeTeam && setup.homeTeam.teamName4).toUpperCase() + ' vs ' + fb_esc(setup.awayTeam && setup.awayTeam.teamName4).toUpperCase() + '</div>';
+	html += '    <div class="fb-match">' + fb_esc(setup.matchIdent).toUpperCase() + ' : ' + fb_esc(setup.homeTeam && setup.homeTeam.teamName4).toUpperCase() 
+	+ ' vs ' + fb_esc(setup.awayTeam && setup.awayTeam.teamName4).toUpperCase() + '</div>';
 	html += '  </div>';
 	html += '</div>';
 
@@ -470,17 +604,13 @@ function renderFruitBoard(dataToProcess){
 	/* --- batting table (shared header, 2 rows) --- */
 	html += '<div class="fb-battable"><table>' +
 		'<tr class="fb-tbl-head"><td></td><td>4s/6s</td><td>S/R</td><td>DOTS</td><td>P\'SHIP</td></tr>' +
-		'<tr class="' + (bat1.active?'':'fb-row-empty') + '"><td class="fb-tbl-name">' + bat1.name + ' <b class="fb-tbl-runs">' + bat1.runs + '</b><small>' + bat1.balls + '</small>' + (bat1.strike?' <i class="fas fa-baseball-bat-ball"></i>':'') + '</td><td>' + bat1.fs + '</td><td>' + bat1.sr + '</td><td>' + bat1.dots + '</td><td>' + bat1.pship + '</td></tr>' +
-		'<tr class="' + (bat2.active?'':'fb-row-empty') + '"><td class="fb-tbl-name">' + bat2.name + ' <b class="fb-tbl-runs">' + bat2.runs + '</b><small>' + bat2.balls + '</small>' + (bat2.strike?' <i class="fas fa-baseball-bat-ball"></i>':'') + '</td><td>' + bat2.fs + '</td><td>' + bat2.sr + '</td><td>' + bat2.dots + '</td><td>' + bat2.pship + '</td></tr>' +
+		'<tr class="' + (bat1.active?'':'fb-row-empty') + '"><td class="fb-tbl-name">' + bat1.name + ' <b class="fb-tbl-runs">' + bat1.runs + '</b><small>' + bat1.balls + '</small>' 
+		+ (bat1.strike?' <i class="fas fa-arrow-left"></i>':'') + '</td><td>' + bat1.fs + '</td><td>' + bat1.sr + '</td><td>' + bat1.dots + '</td><td>' + bat1.pship + '</td></tr>' +
+		'<tr class="' + (bat2.active?'':'fb-row-empty') + '"><td class="fb-tbl-name">' + bat2.name + ' <b class="fb-tbl-runs">' + bat2.runs + '</b><small>' + bat2.balls + '</small>' 
+		+ (bat2.strike?' <i class="fas fa-arrow-left"></i>':'') + '</td><td>' + bat2.fs + '</td><td>' + bat2.sr + '</td><td>' + bat2.dots + '</td><td>' + bat2.pship + '</td></tr>' +
 		'</table></div>';
 
-	/* --- CRR / P'SHIP stacked column ---
-	   Innings 1: just CRR, same as before.
-	   Innings 2: split the same box into two halves - CRR and RRR (required
-	   run rate). RRR is now computed locally via fb_generateRunRate /
-	   fb_getTargetData (ported from CricketFunctions.generateRunRate /
-	   CricketFunctions.GetTargetData on the Java side) instead of being read
-	   from a 'Req_RR' stat key, since a chase is the only time RRR is meaningful. */
+	/* --- CRR / P'SHIP stacked column --- */
 	if(inn.inningNumber == 2){
 		var targetData = fb_getTargetData(dataToProcess, inn);
 		var rrr = (targetData.remaningRuns <= 0)
@@ -505,18 +635,26 @@ function renderFruitBoard(dataToProcess){
 		'<span class="fb-runs">' + fb_safe(inn.totalRuns,'0') + ((inn.totalWickets>=10)?'':('-'+fb_safe(inn.totalWickets,'0'))) + '</span>' +
 		'<span class="fb-overs"><span class="fb-overs-lab">OVERS -</span> <span class="fb-overs-val">' + fb_safe(oversStat,'0') + '</span></span></div>';
 
-	/* --- last wicket + since last boundary --- */
-	html += '<div class="fb-infobar">' +
-		'<span class="fb-lw">' + (lastWicketHtml ? ('<span class="fb-info-lab">LAST WICKET:</span> ' + lastWicketHtml) : '') + '</span>' +
-		'<span class="fb-sb"><span class="fb-info-lab">SINCE LAST B\'DRY:</span> ' + fb_safe(lastBoundaryBalls,'0') + ' BALLS</span>' +
-		'</div>';
+		/* --- last wicket + target + since last boundary --- */
 
-	/* --- bowling table (shared header, 2 rows) --- */
-	html += '<div class="fb-bowltable"><table>' +
-		'<tr class="fb-tbl-head"><td></td><td>O</td><td>D</td><td>E</td></tr>' +
-		'<tr class="' + (bowl1.active?'':'fb-row-empty') + '"><td class="fb-tbl-name">' + (bowl1.current?'<i class="fas fa-circle"></i> ':'') + bowl1.name + ' <b class="fb-tbl-runs">' + bowl1.fig + '</b></td><td>' + bowl1.overs + '</td><td>' + bowl1.dots + '</td><td>' + bowl1.econ + '</td></tr>' +
-		'<tr class="' + (bowl2.active?'':'fb-row-empty') + '"><td class="fb-tbl-name">' + bowl2.name + ' <b class="fb-tbl-runs">' + bowl2.fig + '</b></td><td>' + bowl2.overs + '</td><td>' + bowl2.dots + '</td><td>' + bowl2.econ + '</td></tr>' +
-		'</table></div>';
+		var targetForInfoBar = 0;
+		if(inn.inningNumber == 2){
+		    var firstInnForTarget = fb_inningByNumber(dataToProcess, 1);
+		    if(firstInnForTarget){
+		        targetForInfoBar = (parseInt(fb_safe(firstInnForTarget.totalRuns,'0'),10) || 0) + 1;
+		    }
+		}
+		html += '<div class="fb-infobar">' +'<span class="fb-lw">' + (lastWicketHtml ? ('<span class="fb-info-lab">LAST WICKET:</span> ' + lastWicketHtml) : '') + '</span>' +
+		    '<span class="fb-info-right">' +(inn.inningNumber == 2 ? '<span class="fb-target-info">' + '<span class="fb-info-lab">TARGET:</span> ' + '<b>' + targetForInfoBar + '</b>' + '</span>' : '') +
+			 '<span class="fb-sb">' + '<span class="fb-info-lab">SINCE LAST B\'DRY:</span> ' + fb_safe(lastBoundaryBalls,'0') + ' BALLS' + '</span>' + '</span>' + '</div>';
+
+		/* --- bowling table (shared header, 2 rows) --- */
+		html += '<div class="fb-bowltable"><table>' +  '<tr class="fb-tbl-head"><td></td><td>O</td><td>D</td><td>E</td></tr>' + 
+		 '<tr class="' + (bowl1.active ? '' : 'fb-row-empty') + '">' + '<td class="fb-tbl-name">' + bowl1.name + ' <b class="fb-tbl-runs">' + bowl1.fig + '</b>' + (bowl1.current ? ' <i class="fas fa-circle fb-current-bowler"></i>' : '') +
+		        '</td>' + '<td>' + bowl1.overs + '</td>' + '<td>' + bowl1.dots + '</td>' + '<td>' + bowl1.econ + '</td>' + '</tr>' +
+ 		 '<tr class="' + (bowl2.active ? '' : 'fb-row-empty') + '">' + '<td class="fb-tbl-name">' + bowl2.name + ' <b class="fb-tbl-runs">' + bowl2.fig + '</b>' + (bowl2.current ? ' <i class="fas fa-circle fb-current-bowler"></i>' : '') +
+		        '</td>' + '<td>' + bowl2.overs + '</td>' + '<td>' + bowl2.dots + '</td>' + '<td>' + bowl2.econ + '</td>' + '</tr>' + 
+		    '</table></div>';
 
 	/* --- last ball speed ---
 	html += '<div class="fb-speed"><span class="fb-label">LAST BALL SPEED</span><span class="fb-val">' + fb_safe(fb_statVal(inn,'SPEED'),'-') + '</span></div>';
@@ -528,7 +666,7 @@ function renderFruitBoard(dataToProcess){
 	   bowling rows are (a single rule line between sections), just stacked
 	   in 2 parts instead of 3 columns. */
 	var extrasHtml = '<div class="fb-speed fb-extras">' +
-		'<div class="fb-extras-top"><span class="fb-extras-top-lab">LAST BALL SPEED</span><span class="fb-extras-top-val">' + fb_safe(lastBallSpeed,'-') + '</span></div>' +
+		'<div class="fb-extras-top"><span class="fb-extras-top-lab">BALL SPEED: </span><span class="fb-extras-top-val">' + fb_safe(lastBallSpeed,'-') + ' km/h</span></div>' +
 		'<div class="fb-extras-bottom"><span class="fb-extras-total">EXTRAS: <span class="fb-extras-total-val">' + fb_safe(inn.totalExtras,'0') + '</span></span><span class="fb-extras-cells">';
 	extrasCells.forEach(function(c){ extrasHtml += '<span class="fb-ex-cell"><span class="fb-ex-lab">' + c.lab + '</span> <span class="fb-ex-val">' + c.val + '</span></span>'; });
 	extrasHtml += '</span></div></div>';
@@ -546,20 +684,76 @@ function renderFruitBoard(dataToProcess){
 	html += '<div class="fb-thisover"><span class="fb-to-label">' + thisOverLabel + '</span><span class="fb-to-runs">' + fb_esc(runsThisOver).toUpperCase() 
 		+ '</span><span class="fb-balls">' + ballChips + '</span></div>';
 	/* --- stage stats table --- */
-	/* "AT THIS STAGE" compares this team's score to what the opponent had scored at
-	   the same over/ball count in their innings. No such field existed in the legacy
-	   model, so — matching the pattern already used for TEAM_FOURS/OPP_FOURS above —
-	   it reads optional TEAM_ATSTAGE/OPP_ATSTAGE stat keys and degrades to '-' if the
-	   backend hasn't populated them yet (e.g. rename these two keys to whatever your
-	   Java side actually emits for this figure). */
-	html += '<div class="fb-stage"><table>' +
-		'<tr><th>' + fb_esc(battingScoreLabel) + '</th><th></th><th>' + fb_esc(bowlingScoreLabel) + '</th></tr>' +
-		'<tr><td>' + fb_safe(fb_statVal(inn,'TEAM_FOURS'),'0') + '</td><td class="fb-mid-label">FOURS</td><td>' + fb_safe(fb_statVal(inn,'OPP_FOURS'),'-') + '</td></tr>' +
-		'<tr><td>' + fb_safe(fb_statVal(inn,'TEAM_SIXES'),'0') + '</td><td class="fb-mid-label">SIXES</td><td>' + fb_safe(fb_statVal(inn,'OPP_SIXES'),'-') + '</td></tr>' +
-		'<tr><td>' + fb_safe(fb_statVal(inn,'TEAM_ATSTAGE'),'-') + '</td><td class="fb-mid-label">AT THIS STAGE</td><td>' + fb_safe(fb_statVal(inn,'OPP_ATSTAGE'),'-') + '</td></tr>' +
-		'<tr><td>' + fb_safe(fb_statVal(inn,'TEAM_DOTS'),'-') + '</td><td class="fb-mid-label">DOTS</td><td>' + fb_safe(fb_statVal(inn,'OPP_DOTS'),'-') + '</td></tr>' +
-		'<tr><td>' + fb_safe(fb_statVal(inn,'REVIEWS'),'-') + '</td><td class="fb-mid-label">REVIEWS</td><td>' + fb_safe(fb_statVal(inn,'OPP_REVIEWS'),'-') + '</td></tr>' +
-		'</table></div>';
+	/* AT THIS STAGE is supplied by the controller. The controller uses
+	   CricketFunctions.compareInningData() for the first-innings score at the
+	   current second-innings over/ball position. JS only reads and displays it. */
+
+	var firstInningsStats = firstInning;
+	var secondInningsStats = secondInning;
+
+	var firstTeamFours = firstInningsStats
+	    ? fb_statVal(firstInningsStats, 'TEAM_FOURS')
+	    : '';
+
+	var secondTeamFours = secondInningsStats
+	    ? fb_statVal(secondInningsStats, 'TEAM_FOURS')
+	    : '';
+
+	var firstTeamSixes = firstInningsStats
+	    ? fb_statVal(firstInningsStats, 'TEAM_SIXES')
+	    : '';
+
+	var secondTeamSixes = secondInningsStats
+	    ? fb_statVal(secondInningsStats, 'TEAM_SIXES')
+	    : '';
+
+	var firstTeamDots = firstInningsStats
+	    ? fb_statVal(firstInningsStats, 'TEAM_DOTS')
+	    : '';
+
+	var secondTeamDots = secondInningsStats
+	    ? fb_statVal(secondInningsStats, 'TEAM_DOTS')
+	    : '';
+
+	var firstTeamReviews = firstInningsStats
+	    ? fb_statVal(firstInningsStats, 'REVIEWS')
+	    : '';
+
+	var secondTeamReviews = secondInningsStats
+	    ? fb_statVal(secondInningsStats, 'REVIEWS')
+	    : '';
+
+	/* Default to the values calculated by the controller. */
+	var firstAtStage = firstInningsStats
+	    ? fb_statVal(firstInningsStats, 'TEAM_ATSTAGE')
+	    : '-';
+
+	var secondAtStage = '-';
+
+	if(inn.inningNumber == 2 && secondInningsStats){
+
+	    /*
+	     * During the chase, OPP_ATSTAGE is the first-innings score returned by
+	     * CricketFunctions.compareInningData() at the current stage.
+	     */
+	    var opponentAtStage = fb_statVal(secondInningsStats, 'OPP_ATSTAGE');
+
+	    if(opponentAtStage !== undefined && opponentAtStage !== null && opponentAtStage !== ''){
+	        firstAtStage = opponentAtStage;
+	    }
+
+	    secondAtStage = fb_statVal(secondInningsStats, 'TEAM_ATSTAGE');
+	}
+
+	   html += '<div class="fb-stage"><table>' +
+
+	       '<tr>' +'<th>' + fb_esc(firstInningsScoreLabel) + '</th>' +'<th></th>' +'<th>' + fb_esc(secondInningsScoreLabel) + '</th>' + '</tr>' +
+	       '<tr>' +'<td>' + fb_safe(firstTeamFours, '0') + '</td>' +'<td class="fb-mid-label">FOURS</td>' +'<td>' + fb_safe(secondTeamFours, '0') + '</td>' + '</tr>' +
+	       '<tr>' +'<td>' + fb_safe(firstTeamSixes, '0') + '</td>' +'<td class="fb-mid-label">SIXES</td>' + '<td>' + fb_safe(secondTeamSixes, '0') + '</td>' + '</tr>' +
+	       '<tr>' +'<td>' + fb_safe(firstAtStage, '-') + '</td>' +'<td class="fb-mid-label">AT THIS STAGE</td>' + '<td>' + fb_safe(secondAtStage, '-') + '</td>' +'</tr>' +
+	       '<tr>' +'<td>' + fb_safe(firstTeamDots, '0') + '</td>' +'<td class="fb-mid-label">DOTS</td>' +'<td>' + fb_safe(secondTeamDots, '0') + '</td>' + '</tr>' +
+	       '<tr>' +'<td>' + fb_safe(firstTeamReviews, '0') + '</td>' +'<td class="fb-mid-label">REVIEWS</td>' + '<td>' + fb_safe(secondTeamReviews, '0') + '</td>' + '</tr>' +
+	       '</table></div>';
 
 	/* --- bottom-right contextual panel --- */
 	html += bottomRightHtml;
@@ -581,7 +775,13 @@ function renderFruitBoard(dataToProcess){
 	html += '  <div class="fb-side-bar"><span>' + fb_esc(battingTeamName).toUpperCase() + '</span>' + (battingIsTossWinner ? '<span class="fb-toss-tag">TOSS</span>' : '') + '</div>';
 	html += '  <div class="fb-side-list">' + battingCardHtml + '</div>';
 	html += '  <div class="fb-side-bar fb-side-bar-2"><span>' + fb_esc(bowlingTeamName).toUpperCase() + '</span>' + (bowlingIsTossWinner ? '<span class="fb-toss-tag">TOSS</span>' : '') + '</div>';
-	html += '  <div class="fb-side-sub-head"><span></span><span class="fb-bowl-figs">FIG   &nbsp;&nbsp;OVR   &nbsp;&nbsp;DOTS   &nbsp;&nbsp;ECON</span></div>';
+	html += '  <div class="fb-side-sub-head">' +
+	    '<span></span>' +
+	    '<span>FIG</span>' +
+	    '<span>OVR</span>' +
+	    '<span>DOTS</span>' +
+	    '<span>ECON</span>' +
+	'</div>';
 	html += '  <div class="fb-side-list fb-side-list-bowl">' + (bowlingCardHtml || '<div class="fb-side-empty">No overs bowled yet</div>') + '</div>';
 	html += '</div>';
 
@@ -593,26 +793,11 @@ function renderFruitBoard(dataToProcess){
 	fb_fitToViewport();
 }
 
-/* =========================================================================
-   STRETCH-TO-FILL — the board is designed at a fixed 1920x-tall canvas (see
-   #fruit_board in fruit-board.css). We measure its natural size at scale 1,
-   then transform:scale(x,y) it — X and Y independently — so it fills the
-   ENTIRE viewport edge to edge with no border/margin on any screen, instead
-   of shrinking uniformly and leaving empty space around it. At the target
-   1920x1080 this comes out to scale(1,1): pixel-perfect, no stretch at all.
-   Applied synchronously (not on a delayed frame) so the 1-second
-   auto-refresh never shows a visible flash/flicker.
-   ========================================================================= */
 function fb_fitToViewport(){
 	var board = document.getElementById('fruit_board');
 	if(!board){ return; }
 	fb_applyFit(board);
-
-	/* Webfonts (Oswald/Rajdhani) can finish swapping in a frame or two after
-	   this first pass and shift the board's natural height slightly. Re-apply
-	   once that's settled so the fill stays pixel-accurate. This is a tiny,
-	   silent correction — it does NOT hide/show the board, so it never causes
-	   a visible flash on the 1s auto-refresh. */
+	
 	requestAnimationFrame(function(){
 		requestAnimationFrame(function(){
 			fb_applyFit(document.getElementById('fruit_board'));
@@ -627,11 +812,6 @@ function fb_applyFit(board){
 	var naturalW = board.offsetWidth || 1920;
 	var naturalH = board.offsetHeight || 1;
 
-	/* Pin the board to the viewport's top-left corner and scale from that
-	   corner, rather than trusting the parent's flex centering. That was
-	   leaving a gap on one edge while the opposite edge got cropped —
-	   pinning + scaling from a fixed, known corner removes any ambiguity
-	   about where the board actually sits. */
 	board.style.position = 'fixed';
 	board.style.top = '0';
 	board.style.left = '0';
@@ -652,9 +832,6 @@ window.addEventListener('resize', function(){
 	fb_resizeTimer = setTimeout(fb_fitToViewport, 120);
 });
 
-/* Re-fit once the webfonts actually finish loading - covers the case where
-   the very first render lands before Oswald/Rajdhani are ready. Guarded
-   because document.fonts isn't available in every embedded/OBS browser. */
 if(window.document && document.fonts && document.fonts.ready){
 	document.fonts.ready.then(function(){ fb_fitToViewport(); });
 }
