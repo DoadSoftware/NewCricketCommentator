@@ -666,7 +666,7 @@ function renderFruitBoard(dataToProcess){
 	   bowling rows are (a single rule line between sections), just stacked
 	   in 2 parts instead of 3 columns. */
 	var extrasHtml = '<div class="fb-speed fb-extras">' +
-		'<div class="fb-extras-top"><span class="fb-extras-top-lab">BALL SPEED: </span><span class="fb-extras-top-val">' + fb_safe(lastBallSpeed,'-') + ' km/h</span></div>' +
+		'<div class="fb-extras-top"><span class="fb-extras-top-lab">SPEED: </span><span class="fb-extras-top-val">' + fb_safe(lastBallSpeed,'-') + ' kph</span></div>' +
 		'<div class="fb-extras-bottom"><span class="fb-extras-total">EXTRAS: <span class="fb-extras-total-val">' + fb_safe(inn.totalExtras,'0') + '</span></span><span class="fb-extras-cells">';
 	extrasCells.forEach(function(c){ extrasHtml += '<span class="fb-ex-cell"><span class="fb-ex-lab">' + c.lab + '</span> <span class="fb-ex-val">' + c.val + '</span></span>'; });
 	extrasHtml += '</span></div></div>';
