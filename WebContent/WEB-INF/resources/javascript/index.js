@@ -112,2339 +112,904 @@ function processCricketProcedures(whatToProcess)
 	    }
 	});
 }
+
 function addItemsToList(whatToProcess, dataToProcess)
 {
 	switch (whatToProcess) {
+
 	case 'READ-MATCH-AND-POPULATE':
 
-		/* Premium fruit-screen board: new dedicated renderer.
-		   Only used on the 'fruit' page - all other pages (teams/ident/initialise)
-		   keep using the legacy table-building code below untouched. */
+		/*
+		 * ---------------------------------------------------------
+		 * FRUIT PAGE
+		 * ---------------------------------------------------------
+		 */
 		if($('#select_page').length && $('#select_page').val() == 'fruit'){
+
 			if(typeof renderFruitBoard === 'function'){
+
 				try{
 					renderFruitBoard(dataToProcess);
+
 				}catch(fbErr){
+
 					console.error('renderFruitBoard threw an error:', fbErr);
+
 					$('#fruit_captions_div').html(
-						'<div style="color:#F7D774;background:#0A1747;padding:24px;font-family:Segoe UI,Arial,sans-serif;font-size:16px;border:2px solid #F2C230;">' +
-						'Fruit board failed to render.<br>Open browser DevTools (F12) &rarr; Console tab and send me the red error text.' +
+						'<div style="color:#F7D774;background:#0A1747;padding:24px;' +
+						'font-family:Segoe UI,Arial,sans-serif;font-size:16px;' +
+						'border:2px solid #F2C230;">' +
+						'Fruit board failed to render.<br>' +
+						'Open browser DevTools (F12) &rarr; Console tab and send me the red error text.' +
 						'</div>'
 					);
+
 					document.getElementById('fruit_captions_div').style.display = '';
 				}
-			} else {
-				/* fruit-board.js did not load - most likely a 404 on
-				   /resources/javascript/fruit-board.js. Never fail silently. */
-				console.error('renderFruitBoard is undefined - fruit-board.js did not load (check Network tab for a 404).');
+
+			}else{
+
+				console.error(
+					'renderFruitBoard is undefined - fruit-board.js did not load.'
+				);
+
 				$('#fruit_captions_div').html(
-					'<div style="color:#F7D774;background:#0A1747;padding:24px;font-family:Segoe UI,Arial,sans-serif;font-size:16px;border:2px solid #F2C230;">' +
-					'fruit-board.js was not loaded by the browser.<br>Check DevTools (F12) &rarr; Network tab for a 404 on ' +
-					'<code>/resources/javascript/fruit-board.js</code> and confirm the file was deployed to WEB-INF/resources/javascript/.' +
+					'<div style="color:#F7D774;background:#0A1747;padding:24px;' +
+					'font-family:Segoe UI,Arial,sans-serif;font-size:16px;' +
+					'border:2px solid #F2C230;">' +
+					'fruit-board.js was not loaded by the browser.' +
 					'</div>'
 				);
+
 				document.getElementById('fruit_captions_div').style.display = '';
 			}
+
 			return;
 		}
 
-		var table_head,table_bat,table_score,table_detail,table_Bowl,table_Other,table_Other1,table_PS,table_fow,tbody,row,cell,count,table_BC,table_BOC,table_team;
-		
+
+		/*
+		 * ---------------------------------------------------------
+		 * CLEAR OLD TEAM DATA
+		 * ---------------------------------------------------------
+		 */
 		$('#fruit_captions_div').empty();
 		$('#fruit_teams_div').empty();
-		
-		if(dataToProcess) {
-			
-			table_team = document.createElement('table');
-			table_team.style = 'table-layout:fixed;width:100%';
-			table_team.style.height = '750px';
-			table_team.style.marginTop = "-16px";
-			table_team.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_team.appendChild(tbody);
-			
-			dataToProcess.match.inning.forEach(function(inn,index,arr){
-				if(inn.isCurrentInning == 'YES'){
-					for (var i = 1; i <= 13; i++){
-						row = tbody.insertRow(tbody.rows.length);
-						row.style="background-color: #F2C230 ;border-width: 2px;line-height: 5px;";
-						row.style.fontFamily = 'Rockwell';
-						switch(i){
-							case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
-								count = 2;	
-								break;
-							case 13:
-								count = 1;	
-								break;
-						}
-						for (var j=1;j<=count;j++){
-							cell = row.insertCell(j-1);
-							switch(i){
-								case 1:
-									cell.style = "background: #F2C230;font-weight: bold;border-color: Black;border-width: 2px;line-height: 50px;font-size:40px;";
-									switch(j){
-										case 1:
-										//cell.colSpan = 3;
-										cell.style.height = '20px';
-										cell.style.textAlign = "center";
-										cell.style.fontWeight = "900";
-										cell.innerHTML = dataToProcess.setup.homeTeam.teamName1;
-										break;
-										case 2:
-										//cell.colSpan = 3;
-										cell.style.height = '20px';
-										cell.style.textAlign = "center";
-										cell.style.fontWeight = "900";
-										cell.innerHTML = dataToProcess.setup.awayTeam.teamName1;
-										break;
-									}	
-									break;
-								case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11: case 12:
-									cell.style="background-color: #F2C230 ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 50px;font-size:30px;";
-									//cell.style.height = "39px"
-									
-									switch(j){
-										case 1:
-										cell.style.width = "25%"
-										if(dataToProcess.setup.homeSquad[i-2].captainWicketKeeper == 'wicket_keeper'){
-											cell.innerHTML = dataToProcess.setup.homeSquad[i-2].full_name + " (WK)" ;
-										}else if(dataToProcess.setup.homeSquad[i-2].captainWicketKeeper == 'captain'){
-											cell.innerHTML = dataToProcess.setup.homeSquad[i-2].full_name + " (C)";
-										}else if(dataToProcess.setup.homeSquad[i-2].captainWicketKeeper == 'captain_wicket_keeper'){
-											cell.innerHTML = dataToProcess.setup.homeSquad[i-2].full_name + " (C&WK)";
-										}else{
-											cell.innerHTML = dataToProcess.setup.homeSquad[i-2].full_name;
-										}
-										
-										break;
-										case 2:
-										cell.style.width = '60%';
-										if(dataToProcess.setup.awaySquad[i-2].captainWicketKeeper == 'wicket_keeper'){
-											cell.innerHTML = dataToProcess.setup.awaySquad[i-2].full_name + " (WK)" ;
-										}else if(dataToProcess.setup.awaySquad[i-2].captainWicketKeeper == 'captain'){
-											cell.innerHTML = dataToProcess.setup.awaySquad[i-2].full_name + " (C)";
-										}else if(dataToProcess.setup.awaySquad[i-2].captainWicketKeeper == 'captain_wicket_keeper'){
-											cell.innerHTML = dataToProcess.setup.awaySquad[i-2].full_name + " (C&WK)";
-										}else{
-											cell.innerHTML = dataToProcess.setup.awaySquad[i-2].full_name;
-										}
-										//cell.innerHTML = dataToProcess.setup.awaySquad[i-2].full_name;
-										break;
-									}
-									break;
-								case 13:
-									cell.colSpan = 2;
-									cell.style = "background: #0A1747; color: #FFFFFF;font-size:32px; font-weight: bold;line-height: 34px;";
-									cell.style.textAlign = "center";
-									cell.style.height = "25px"
-									cell.style.width = "20px"
-									for(var key in inn.stats){
-										if(key == 'TOSS'){
-											cell.innerHTML = inn.stats[key].toUpperCase();
-										}
-									}
-									break;		
+
+
+		if(!dataToProcess || !dataToProcess.setup){
+			return;
+		}
+
+
+		var setup = dataToProcess.setup;
+
+		var homeSquad = setup.homeSquad || [];
+		var awaySquad = setup.awaySquad || [];
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * GET SUBSTITUTE DATA
+		 *
+		 * First we check for a separate substitute array.
+		 *
+		 * Supported names:
+		 *
+		 * homeSubstitute
+		 * homeSubstitutes
+		 * homeSubs
+		 * homeSub
+		 * homeBench
+		 *
+		 * Same for away.
+		 *
+		 * If no separate array exists, players after the
+		 * first 11 players are treated as substitutes.
+		 * ---------------------------------------------------------
+		 */
+		function getSubstitutes(side, squad){
+
+			var possibleNames = [
+				side + 'Substitute',
+				side + 'Substitutes',
+				side + 'Subs',
+				side + 'Sub',
+				side + 'Bench'
+			];
+
+			var substitutes = [];
+
+			for(var i = 0; i < possibleNames.length; i++){
+
+				var value = setup[possibleNames[i]];
+
+				if(Array.isArray(value)){
+
+					substitutes = value;
+					break;
+				}
+			}
+
+
+			/*
+			 * If backend does not have a separate substitute array,
+			 * consider players after the first 11 as substitutes.
+			 */
+			if(substitutes.length === 0 && squad.length > 11){
+
+				substitutes = squad.slice(11);
+			}
+
+			return substitutes;
+		}
+
+
+		var homeSubstitutes = getSubstitutes('home', homeSquad);
+		var awaySubstitutes = getSubstitutes('away', awaySquad);
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * REMOVE SUBSTITUTES FROM PLAYING SQUAD
+		 *
+		 * This is important when the backend sends 12/13 players
+		 * inside homeSquad / awaySquad.
+		 * ---------------------------------------------------------
+		 */
+		if(
+			homeSubstitutes.length > 0 &&
+			!Array.isArray(setup.homeSubstitute) &&
+			!Array.isArray(setup.homeSubstitutes) &&
+			!Array.isArray(setup.homeSubs) &&
+			!Array.isArray(setup.homeSub) &&
+			!Array.isArray(setup.homeBench)
+		){
+			homeSquad = homeSquad.slice(0, 11);
+		}
+
+
+		if(
+			awaySubstitutes.length > 0 &&
+			!Array.isArray(setup.awaySubstitute) &&
+			!Array.isArray(setup.awaySubstitutes) &&
+			!Array.isArray(setup.awaySubs) &&
+			!Array.isArray(setup.awaySub) &&
+			!Array.isArray(setup.awayBench)
+		){
+			awaySquad = awaySquad.slice(0, 11);
+		}
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * DETERMINE WHETHER SUBSTITUTE COLUMNS ARE REQUIRED
+		 * ---------------------------------------------------------
+		 */
+		var hasHomeSubstitutes = homeSubstitutes.length > 0;
+		var hasAwaySubstitutes = awaySubstitutes.length > 0;
+
+		var hasSubstitutes = hasHomeSubstitutes || hasAwaySubstitutes;
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * FIND TOSS INFORMATION
+		 * ---------------------------------------------------------
+		 */
+		var tossText = '';
+
+		if(dataToProcess.match && dataToProcess.match.inning){
+
+			dataToProcess.match.inning.forEach(function(inn){
+
+				if(inn.isCurrentInning == 'YES' && inn.stats){
+
+					if(inn.stats.TOSS){
+
+						tossText = String(inn.stats.TOSS).toUpperCase();
+
+						/*
+						 * Keep the original toss sentence, but replace a short
+						 * team-name token with the configured full team name.
+						 */
+						var homeFullTeamName = String(
+							(setup.homeTeam && setup.homeTeam.teamName1) || ''
+						).toUpperCase();
+
+						var awayFullTeamName = String(
+							(setup.awayTeam && setup.awayTeam.teamName1) || ''
+						).toUpperCase();
+
+						function replaceShortTeamName(toss, fullName){
+
+							if(!fullName || toss.indexOf(fullName) !== -1){
+								return toss;
 							}
+
+							var parts = fullName.trim().split(/\s+/);
+
+							if(parts.length === 0){
+								return toss;
+							}
+
+							var shortName = parts[parts.length - 1];
+
+							if(!shortName){
+								return toss;
+							}
+
+							return toss.replace(
+								new RegExp('\\b' + shortName.replace(/[.*+?^${}()|[\]\\]/g, '\\$&') + '\\b', 'g'),
+								fullName
+							);
 						}
+
+						tossText = replaceShortTeamName(tossText, homeFullTeamName);
+						tossText = replaceShortTeamName(tossText, awayFullTeamName);
 					}
 				}
 			});
-			
-			
-			table_head = document.createElement('table');
-			table_head.style = 'table-layout:fixed;width:100%';
-			table_head.style.marginTop = "-16px";
-			table_head.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_head.appendChild(tbody);
-			
-			for (var i = 1; i <= 1; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				switch(i){
-					case 1:
-						row.style="background-color: #0A1747 ; color: #FFFFFF; font-size:25px; font-weight: bold;";
-						row.style.fontFamily = 'Rockwell';
-						row.style.textAlign = "center";
-						row.innerHTML = dataToProcess.setup.homeTeam.teamName1 + " v " + dataToProcess.setup.awayTeam.teamName1 +' - '+ dataToProcess.setup.tournament +
-						 ' ('+dataToProcess.setup.matchIdent + ')';
-						break;
-				}
-			}
-			
-			table_bat = document.createElement('table');
-			table_bat.style = 'table-layout:fixed;width:850px;';
-			table_bat.style.height = '220px';
-			table_bat.style.marginTop = "-16px";
-			table_bat.style.marginRight = "-12px";
-			table_bat.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_bat.appendChild(tbody);
+		}
 
-			for (var i = 1; i <= 4; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				row.style = "background: #F2C230; color: #0A1747; border-color: Black;border-width: 3px;font-weight: bold;"
-				//row.style.padding = '50px';
-				row.style.fontFamily = 'Rockwell';
-				var player1_found = false;
-				var player2_found = false;
-				switch(i){
-					case 1: case 2: case 3: case 4:
-						count = 6;
-						break;
-				}
-				for (var j = 1; j <= count; j++){
-					cell = row.insertCell(j-1);
-					switch (i){
-						case 1:
-							cell.style = "text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:18px;line-height: 13px;";
-							cell.style.fontFamily = 'Rockwell';
-							cell.style.fontWeight = "900";
-							switch(j){
-								case 1:
-									cell.style.width = '30%';
-									cell.innerHTML = 'BAT';
-									break;
-								case 2:
-									cell.style.width = '14%';
-									cell.innerHTML = 'RUNS';
-									break;
-								case 3:
-									cell.style.width = '20%';
-									cell.innerHTML = '4s/6s';
-									break;
-								case 4:
-									cell.style.width = '18%';
-									cell.innerHTML = 'S/R';
-									break;
-								case 5:
-									cell.style.width = '12%';
-									cell.innerHTML = 'DOTS';
-									break;
-								case 6:
-									cell.style.width = '23%';
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											inn.partnerships.forEach(function(ps,index,arr4){
-												cell.innerHTML = "P'ship : " + ps.totalRuns + ' (' + ps.totalBalls + ')';
-											});
-										}
-									});
-									break;
-							}
-							break;
-						case 2:
-							cell.style = 'border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;text-align:center;';
-							cell.style.height = '15px';
-							cell.style.fontFamily = 'Rockwell';
-							
-							dataToProcess.match.inning.forEach(function(inn,index,arr){
-								if(inn.isCurrentInning == 'YES'){
-									inn.battingCard.forEach(function(bc,index,arr1){
-										if(bc.status == 'NOT OUT' && bc.onStrike == 'YES'){
-											switch(j){
-												case 1:
-													//cell.innerHTML = 'ZZZZZZZZZZBBB' + '*';
-													cell.innerHTML = bc.player.ticker_name.slice(0,10) + '*';
-													//cell.style.fontWeight = "600";
-													break;
-												case 2:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													//cell.innerHTML = '999' +' (' + '999' + ')';
-													cell.innerHTML = bc.runs +' ('+bc.balls+')';
-													break;
-												case 3:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													cell.innerHTML = bc.fours + '/' + bc.sixes;
-													break;
-												case 4:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													if(bc.strikeRate == 0){
-														cell.innerHTML = '-';
-													}else{
-														cell.innerHTML = bc.strikeRate;
-													}
-													break;
-												case 5:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													for(var key in inn.stats){
-														if(key == 'BATSMAN1DOTS'){
-															cell.innerHTML = inn.stats[key].split(',')[0];
-														}
-													}
-													break;
-												case 6:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													if(inn.partnerships.length > 0) {
-														if(bc.playerId == inn.partnerships[inn.partnerships.length-1].firstBatterNo){
-															cell.innerHTML = inn.partnerships[inn.partnerships.length-1].firstBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].firstBatterBalls + ')';
-														}
-														else{
-															cell.innerHTML = inn.partnerships[inn.partnerships.length-1].secondBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].secondBatterBalls + ')';
-														}
-														
-													} else {
-														cell.innerHTML = '';
-													}
-													break;
-												
-											}
-											player1_found = true;
-										}
-									});
-									
-									if(player1_found == false){
-										//alert(player1_found)
-										switch(j){
-											case 1:
-												var size = inn.fallsOfWickets.length;
-												/*dataToProcess.eventFile.events.forEach(function(evnt,index,arr){
-													if(evnt[evnt.length-1].eventType == 'LOG_WICKET'){
-														if(evnt[evnt.length-1].eventHowOut == 'RETIRED_HURT'){
-															cell.innerHTML = '-';
-														}
-													}
-												});*/
-													
-												dataToProcess.setup.homeSquad.forEach(function(hs,index,arr){
-												//alert(hs.playerId)
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[size - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == hs.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = hs.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.homeOtherSquad.forEach(function(hos,index,arr){
-												//alert(hs.playerId)
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[size - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == hos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = hos.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.homeSubstitutes.forEach(function(hsub,index,arr){
-												//alert(hs.playerId)
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[size - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == hsub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = hsub.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.awaySquad.forEach(function(as,index,arr){
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == as.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = as.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.awayOtherSquad.forEach(function(aos,index,arr){
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == aos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = aos.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.awaySubstitutes.forEach(function(asub,index,arr){
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == asub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = asub.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												break;
-											case 2:
-												if(inn.fallsOfWickets.length > 0){
-													inn.battingCard.forEach(function(bc,index,arr){
-														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															//alert(bc.runs +' ('+bc.balls+')')
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-															cell.innerHTML = bc.runs +' ('+bc.balls+')';
-														}
-													});
-												}
-												break;
-											case 3:
-												if(inn.fallsOfWickets.length > 0){
-													inn.battingCard.forEach(function(bc,index,arr){
-														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-															cell.innerHTML = bc.fours + '/' + bc.sixes;
-														}
-													});
-												}
-												break;
-											case 4:
-												if(inn.fallsOfWickets.length > 0){
-													inn.battingCard.forEach(function(bc,index,arr){
-														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															if(bc.strikeRate == 0){
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-																cell.innerHTML = '-';
-															}else{
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-																cell.innerHTML = bc.strikeRate;
-															}
-														}
-													});
-												}
-												break;
-											case 5:
-												for(var key in inn.stats){
-													if(key == 'BATSMAN_OUT'){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-														cell.innerHTML = inn.stats[key].split(',')[0];
-													}
-												}
-												break;
-											case 6:
-												if(inn.partnerships.length > 0 && inn.fallsOfWickets.length > 0) {
-													if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == inn.partnerships[inn.partnerships.length-1].firstBatterNo){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].firstBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].firstBatterBalls + ')';
-													}
-													else{
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].secondBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].secondBatterBalls + ')';
-													}
-													
-												} else {
-													cell.style="font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-													cell.innerHTML = '';
-												}
-												break;
-										}
-									}
-								}				
-							});		
-							break;
-						case 3:
-							cell.style = 'text-align:center; border-color: Black;border-width: 3px;font-weight: bold;line-height: 13px;line-height: 13px;';
-							cell.style.fontFamily = 'Rockwell';
-							dataToProcess.match.inning.forEach(function(inn,index,arr){
-								if(inn.isCurrentInning == 'YES'){
-									inn.battingCard.forEach(function(bc,index,arr1){
-										if(bc.status == 'NOT OUT' && bc.onStrike == 'NO'){
-											switch(j){
-												case 1:
-													cell.style="font-size:21px; font-weight: bold;border-color: Black;line-height: 13px;text-align:center;";
-													cell.innerHTML = bc.player.ticker_name.slice(0,10);
-													//cell.style.fontWeight = "900";
-													break;
-												case 2:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													cell.innerHTML = bc.runs +' ('+bc.balls+')';
-													break;
-												case 3:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													cell.innerHTML = bc.fours + '/' + bc.sixes;
-													break;
-												case 4:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													if(bc.strikeRate == 0){
-														cell.innerHTML = '-';
-													}else{
-														cell.innerHTML = bc.strikeRate;
-													}
-													break;
-												case 5:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													for(var key in inn.stats){
-														if(key == 'BATSMAN2DOTS'){
-															cell.innerHTML = inn.stats[key].split(',')[0];
-														}
-													}
-													break;
-												case 6:
-													cell.style = 'text-align:center;border-color: Black;border-width: 3px;font-weight: bold;font-size:21px;line-height: 13px;';
-													if(inn.partnerships.length > 0) {
-														if(bc.playerId == inn.partnerships[inn.partnerships.length-1].firstBatterNo){
-															cell.innerHTML = inn.partnerships[inn.partnerships.length-1].firstBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].firstBatterBalls + ')';
-														}
-														else{
-															cell.innerHTML = inn.partnerships[inn.partnerships.length-1].secondBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].secondBatterBalls + ')';
-														}
-														
-													} else {
-														cell.innerHTML = '';
-													}
-													break;
-												
-											}
-											player2_found = true;
-										}
-									});
-									if(player2_found == false){
-										//alert(player1_found)
-										switch(j){
-											case 1:
-												var size = inn.fallsOfWickets.length;
-												
-												dataToProcess.setup.homeSquad.forEach(function(hs,index,arr){
-												//alert(hs.playerId)
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[size - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == hs.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = hs.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.homeOtherSquad.forEach(function(hos,index,arr){
-												//alert(hs.playerId)
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[size - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == hos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = hos.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.homeSubstitutes.forEach(function(hsub,index,arr){
-												//alert(hs.playerId)
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[size - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == hsub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = hsub.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.awaySquad.forEach(function(as,index,arr){
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == as.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = as.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.awayOtherSquad.forEach(function(aos,index,arr){
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == aos.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = aos.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												dataToProcess.setup.awaySubstitutes.forEach(function(asub,index,arr){
-													if(inn.fallsOfWickets.length > 0){
-														//alert(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].playerId)
-														if(inn.fallsOfWickets[size - 1].fowPlayerID == asub.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;border-color: Black;border-width: 3px;line-height: 13px;text-align:center;";
-															cell.innerHTML = asub.ticker_name.slice(0,10);
-														}
-													}else{
-														cell.innerHTML = '';
-													}
-													
-												});
-												break;
-											case 2:
-												if(inn.fallsOfWickets.length > 0){
-													inn.battingCard.forEach(function(bc,index,arr){
-														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															//alert(bc.runs +' ('+bc.balls+')')
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-															cell.innerHTML = bc.runs +' ('+bc.balls+')';
-														}
-													});
-												}
-												break;
-											case 3:
-												if(inn.fallsOfWickets.length > 0){
-													inn.battingCard.forEach(function(bc,index,arr){
-														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-															cell.innerHTML = bc.fours + '/' + bc.sixes;
-														}
-													});
-												}
-												break;
-											case 4:
-												if(inn.fallsOfWickets.length > 0){
-													inn.battingCard.forEach(function(bc,index,arr){
-														if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId){
-															if(bc.strikeRate == 0){
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-																cell.innerHTML = '-';
-															}else{
-																cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-																cell.innerHTML = bc.strikeRate;
-															}
-														}
-													});
-												}
-												break;
-											case 5:
-												for(var key in inn.stats){
-													if(key == 'BATSMAN_OUT'){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-														cell.innerHTML = inn.stats[key].split(',')[0];
-													}
-												}
-												break;
-											case 6:
-												if(inn.partnerships.length > 0) {
-													if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == inn.partnerships[inn.partnerships.length-1].firstBatterNo){
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].firstBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].firstBatterBalls + ')';
-													}
-													else{
-														cell.style="background: #D42027;color: #FFFFFF;font-size:21px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;line-height: 13px;";
-														cell.innerHTML = inn.partnerships[inn.partnerships.length-1].secondBatterRuns + ' (' + inn.partnerships[inn.partnerships.length-1].secondBatterBalls + ')';
-													}
-													
-												} else {
-													cell.style="font-size:21px; font-weight: bold;text-align:center; border-color: Black;border-width: 3px;line-height: 13px;";
-													cell.innerHTML = '';
-												}
-												break;
-										}
-									}
-								}				
-							});	
-							break;
-						case 4:
-							//cell.style = "background: #D42027; color: Black; border-color: Black;border-width: 3px;font-weight: bold;line-height: 13px;"
-							switch(j){
-								case 1:
-									cell.style = "background: #D42027;color: #FFFFFF;border-color: Black;border-width: 3px;font-weight: bold;text-align:center;"
-									cell.style.fontFamily = 'Rockwell';
-									cell.style.fontWeight = "800";
-									cell.style.maxWidth = '180px'
-									cell.innerHTML = 'LAST WKT';
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											inn.battingCard.forEach(function(bc,index,arr1){
-												if(inn.fallsOfWickets.length > 0){
-													if(inn.fallsOfWickets[inn.fallsOfWickets.length - 1].fowPlayerID == bc.playerId) {
-														cell.innerHTML = cell.innerHTML + '<br><br>' + bc.player.ticker_name.slice(0,10) + ' ' + bc.runs + ' (' + bc.balls + ')' ;
-													}
-												}
-											});
-										}
-									});
-									break;
-								case 2: case 3: case 4:
-									
-									cell.style.fontFamily = 'Rockwell';
-									switch(j){
-										case 2:
-											cell.style="background: #F2C230;font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;";
-											dataToProcess.match.inning.forEach(function(inn,index,arr){
-												if(inn.isCurrentInning == 'YES'){
-													cell.innerHTML = 'EXTRAS <br>' + inn.totalExtras ;
-												}
-											});
-											break;
-										case 3:
-											cell.style="background: #F2C230;font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 3px;";
-											dataToProcess.match.inning.forEach(function(inn,index,arr){
-												if(inn.isCurrentInning == 'YES'){
-													
-													if(inn.totalWides != 0){
-														cell.innerHTML = 'WD:' + inn.totalWides;
-													}
-													if(inn.totalNoBalls != 0 ){
-														cell.innerHTML = cell.innerHTML + ' ' + 'NB:' + inn.totalNoBalls + '<br>';
-													}
-													if(inn.totalByes != 0){
-														cell.innerHTML = cell.innerHTML + ' ' + 'B:' + inn.totalByes;
-													}
-													if(inn.totalLegByes != 0){
-														cell.innerHTML = cell.innerHTML + ' ' + 'LB:' + inn.totalLegByes + '<br>';
-													}
-													if(inn.totalPenalties != 0){
-														cell.innerHTML = cell.innerHTML + ' ' + 'P:' + inn.totalPenalties;
-													}
-													
-												}
-											});
-											break;
-										case 4:
-											cell.style = "background: #9AA0A6; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;font-size:18px;"
-											dataToProcess.match.inning.forEach(function(inn,index,arr){
-												if(inn.isCurrentInning == 'YES'){
-													for(var key in inn.stats){
-														if(key == 'BOUNDARY'){
-															cell.innerHTML = "LAST B'DRY <br>" + inn.stats[key];
-														}
-													}
-												}
-											});
-											break;
-									}
-									break;
-								case 5:
-									cell.style = "background: #6FC6E9; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;"
-									cell.style.fontFamily = 'Rockwell';
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										//if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES')
-										if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES'){
-											cell.innerHTML = 'PROJ. <br> SCORE';
-										}
-									});
-									break;
-								case 6:
-									cell.style = "background: #6FC6E9; color: Black; border-color: Black;border-width: 3px;font-weight: bold;text-align:center;font-size:20px;"
-									cell.style.fontFamily = 'Rockwell';
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'PS'){
-													const myArray = inn.stats[key].split(",");
-													cell.innerHTML = '@' + myArray[1] + ' (CRR) <br>' + myArray[0] ;
-												}
-											}
-										}
-									});
-									break;
-							}
-							break;
-					}
-				}
-			}
-			
-			table_score = document.createElement('table');
-			//table_score.style.maxWidth = '50px';
-			table_score.style = 'table-layout:fixed;width:20%; margin-left:1%;';
-			table_score.style.height = "220px";
-			table_score.style.marginTop = "-16px";
-			table_score.style.marginLeft = "12px";
-			table_score.style.marginRight = "-12px";
-			table_score.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_score.appendChild(tbody);
 
-			for (var i = 1; i <= 3; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				switch(i){
-					case 1:
-						row.style="background-color: #D42027; color: #FFFFFF; font-size:42px; font-weight: bold;border-color: Black;border-width: 2px;";
-						row.style.height = '20px';
-						row.style.fontFamily = 'Rockwell';
-						row.style.textAlign = "center";
-						dataToProcess.match.inning.forEach(function(inn,index,arr){
-								if(inn.isCurrentInning == 'YES'){
-									if(inn.battingTeamId == dataToProcess.setup.homeTeamId){
-										//row.innerHTML = '<br>';	
-										row.innerHTML = dataToProcess.setup.homeTeam.teamName4 ;
-									}
-									else {
-										//row.innerHTML = '<br>';	
-										row.innerHTML = dataToProcess.setup.awayTeam.teamName4 ;
-									}
-									
-									switch(dataToProcess.setup.matchType){
-										case 'DT20': case 'IT20':
-										//alert(row.innerHTML)
-											for(var key in inn.stats){
-												if(key == 'POWERPLAY'){
-													if(inn.stats[key] == 'P1'){
-														row.innerHTML = row.innerHTML + ' (P)';
-													}else if(inn.stats[key] == ''){
-														row.innerHTML = row.innerHTML + ' ';
-													}
-												}
-											}
-											break;
-											
-										case 'ODI': case 'OD':
-											for(var key in inn.stats){
-												if(key == 'POWERPLAY'){
-													if(inn.stats[key] == 'P1'){
-														row.innerHTML = row.innerHTML + ' (' + inn.stats[key] + ')';
-													}else if(inn.stats[key] == 'P2'){
-														row.innerHTML = row.innerHTML + ' (' + inn.stats[key] + ')';
-													}else if(inn.stats[key] == 'P3'){
-														row.innerHTML = row.innerHTML + ' (' + inn.stats[key] + ')';
-													}else{
-														row.innerHTML = row.innerHTML + '';
-													}
-												}
-											}
-											break;
-									}
-									
-									if(inn.battingTeamId == dataToProcess.setup.homeTeamId){
-										if(inn.totalWickets >= 10){
-											row.innerHTML = row.innerHTML + "<br />" + inn.totalRuns;
-										}else{
-											row.innerHTML = row.innerHTML + "<br />" + inn.totalRuns + '-' + inn.totalWickets;
-										}
-									}
-									else {
-										if(inn.totalWickets >= 10){
-											row.innerHTML = row.innerHTML + "<br />" + inn.totalRuns;
-										}else{
-											row.innerHTML = row.innerHTML + "<br />" + inn.totalRuns + '-' + inn.totalWickets;
-										}
-									}
-									
-									for(var key in inn.stats){
-										if(key == 'OVER' + inn.inningNumber){
-											row.innerHTML = row.innerHTML + ' ('+ inn.stats[key] + ')';
-										}
-									}
-								}
-							});
-						break;
-					case 2:
-						row.style="background-color: #7A7A7A; color: #0A1747; font-size:23px; font-weight: 700;font-weight: bold;border-color: Black;border-width: 2px;line-height: 50px;"
-						row.style.textAlign = "center";
-						row.style.fontFamily = 'Rockwell';
-						dataToProcess.match.inning.forEach(function(inn,index,arr){
-							if(inn.isCurrentInning == 'YES'){
-								row.innerHTML = 'CRR :' + inn.runRate;
-							}
-							if(inn.inningNumber == 2 && inn.isCurrentInning == 'YES'){
-								if(dataToProcess.match.inning[0].totalRuns > dataToProcess.match.inning[1].totalRuns){
-									for(var key in inn.stats){
-										if(key == 'Req_RR'){
-											row.innerHTML = 'CRR : ' + inn.runRate + '&nbsp &nbsp RRR : ' + inn.stats[key];
-										}
-									}
-								}
-								else{
-									row.innerHTML = 'CRR :' + inn.runRate + '&nbsp &nbsp RRR : 0.00'
-								}
-							}
-						});
-						break;
-					case 3:
-						row.style="background-color: #FFFFFF; color: #0A1747; font-size:22px; font-weight: bold;font-weight: bold;border-color: Black;border-width: 2px;line-height: 18px;"
-						row.style.height = '50px';
-						row.style.textAlign = "center";
-						row.style.fontFamily = 'Rockwell';
-						row.innerHTML = 'SPEED';
-						break;	
-				}
+		/*
+		 * ---------------------------------------------------------
+		 * CREATE MAIN TABLE
+		 * ---------------------------------------------------------
+		 */
+		var table_team = document.createElement('table');
+
+		table_team.className = 'table table-bordered';
+
+		table_team.style.width = '100%';
+		table_team.style.height = '100vh';
+		table_team.style.margin = '0';
+		table_team.style.padding = '0';
+		table_team.style.tableLayout = 'fixed';
+		table_team.style.borderCollapse = 'collapse';
+		table_team.style.fontFamily = 'Rockwell, Georgia, serif';
+		table_team.style.backgroundColor = '#F2C230';
+
+
+		var tbody = document.createElement('tbody');
+
+		table_team.appendChild(tbody);
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * COLUMN COUNT
+		 *
+		 * WITH SUBSTITUTE:
+		 *
+		 * HOME SQUAD | SUBSTITUTE | AWAY SQUAD | SUBSTITUTE
+		 *
+		 * WITHOUT SUBSTITUTE:
+		 *
+		 * HOME SQUAD | AWAY SQUAD
+		 * ---------------------------------------------------------
+		 */
+		var columnCount = hasSubstitutes ? 4 : 2;
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * HELPER - CREATE CELL
+		 * ---------------------------------------------------------
+		 */
+		function createCell(row, text, colspan){
+
+			var cell = row.insertCell(-1);
+
+			cell.innerHTML = text || '';
+
+			if(colspan){
+				cell.colSpan = colspan;
 			}
-			
-			if(dataToProcess.setup.matchType == 'TEST'){
-				table_detail = document.createElement('table');
-				table_detail.style = 'table-layout:fixed;';
-				table_detail.style.height = "265px";
-				table_detail.style.width = "375px";
-				table_detail.style.marginTop = "-16px";
-				//table_detail.style.marginBottom = "-2px";
-				table_detail.style.marginLeft = "11px";
-				table_detail.style.marginRight = "-12px";
-				table_detail.setAttribute('class', 'table table-bordered');
-				tbody = document.createElement('tbody');
-				table_detail.appendChild(tbody);	
-				
-				for (var i = 1; i <= 5; i++){
-					row = tbody.insertRow(tbody.rows.length);
-					row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
-					switch(i){
-						case 1: case 2:  case 3:  case 4: case 5:
-							count = 4;
-							break;
-					}
-					for (var j = 1; j <= count; j++){
-						cell = row.insertCell(j-1);
-						switch(i){
-							case 1:
-								row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
-								row.style.fontFamily = 'Rockwell';
-								switch(j){
-									case 1:
-										cell.innerHTML = '';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										cell.style.width = '38%';
-										break;
-									case 2:
-										cell.innerHTML = 'SCORE';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										cell.style.width = '20%';
-										break;	
-									case 3:
-										cell.innerHTML = 'OVR';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.width = '15%';
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;
-									case 4:
-										cell.innerHTML = 'OVR RATE';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:17px;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.width = '27%';
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;	
-								}
-								break;
-							case 2:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 1){
-												if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-													cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + " 1st INN";
-												}
-												else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-													cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + " 1st INN";
-												}
-											}
-										});
-										break
-									case 2:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 1){
-												if (inn.totalBalls > 0 || inn.totalOvers > 0)
-			                                    {
-													cell.innerHTML = '888' + "-" + '88'
-													//cell.innerHTML = inn.totalRuns + "-" + inn.totalWickets;
-			                                    }
-											}
-										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;
-									case 3:
-										
-	                                      //  lbls.Text = Convert.ToString(match.match.innings[0].totalRuns) + "-" + Convert.ToString(match.match.innings[0].totalWickets) +
-	                                           // "           " + Functions.OverBalls(match.match.innings[0].totalOvers, match.match.innings[0].totalBalls) + "          " +
-	                                         //   match.match.innings[0].runRate;
-	                                        //lbls.Text = "888-8       888       8.88     ";
-	                                        
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-													cell.innerHTML = inn.totalFours + '/' + inn.totalSixes;
-												}
-												else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-													cell.innerHTML = inn.totalFours + '/' + inn.totalSixes;
-												}
-											}
-										});
-										break;
-									case 4:
-										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;	
-								}
-								break;
-							case 3:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-													cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + " 1st INN";
-												}
-												else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-													cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + " 1st INN";
-												}
-											}
-										});
-										break
-									case 2:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												if (inn.totalBalls > 0 || inn.totalOvers > 0)
-			                                    {
-													cell.innerHTML = inn.totalRuns + "-" + inn.totalWickets;
-			                                    }
-											}
-										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;
-									case 3:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												for(var key in inn.stats){
-													if(key == 'DOTBALLS'  + inn.inningNumber){
-														cell.innerHTML = inn.stats[key];
-													}
-												}
-											}
-										});
-										break;
-									case 4:
-										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;	
-								}
-								break;	
-							case 4:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 3){
-												if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-													cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + " 2nd INN";
-												}
-												else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-													cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + " 2nd INN";
-												}
-											}
-										});
-										break;
-									case 2:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 3){
-												if (inn.totalBalls > 0 || inn.totalOvers > 0)
-			                                    {
-													cell.innerHTML = inn.totalRuns + "-" + inn.totalWickets;
-			                                    }
-											}
-										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";		
-										break;
-									case 3:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2 && inn.isCurrentInning == 'YES'){
-												cell.innerHTML = inn.totalRuns + '-' + inn.totalWickets ;
-											}
-										});
-										break;
-									case 4:
-										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;	
-								}
-								break;	
-							case 5:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 4){
-												if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-													cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + " 2nd INN";
-												}
-												else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-													cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + " 2nd INN";
-												}
-											}
-										});
-										break;
-									case 2:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 4){
-												if (inn.totalBalls > 0 || inn.totalOvers > 0)
-			                                    {
-													cell.innerHTML = inn.totalRuns + "-" + inn.totalWickets;
-			                                    }
-											}
-										});
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;
-									case 3:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												cell.innerHTML = inn.totalExtras;
-											}
-										});
-										break;
-									case 4:
-										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;	
-								}
-								break;			
-						}
-					}
-				}
+
+			cell.style.border = '1px solid #111';
+			cell.style.textAlign = 'center';
+			cell.style.verticalAlign = 'middle';
+			cell.style.padding = '0';
+
+			return cell;
+		}
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * HEADER
+		 * ---------------------------------------------------------
+		 */
+		var headerRow = tbody.insertRow(-1);
+
+		var headerCell = createCell(
+			headerRow,
+			'',
+			columnCount
+		);
+
+		headerCell.style.padding = '0';
+		headerCell.style.border = 'none';
+		headerCell.style.height = '70px';
+
+		var headerHTML = '';
+
+		headerHTML += '<div class="fb-header">';
+		headerHTML += '  <div class="fb-logo"><img class="fb-logo-image" src="resources/Images/doad_logo_header.png"  alt="Design on a Dime"> Design on a Dime</div>';
+		headerHTML += '  <div class="fb-title">';
+		headerHTML += '    <div class="fb-tourney">' +
+			String(setup.tournament || '').toUpperCase() +
+		'</div>';
+		headerHTML += '    <div class="fb-match">' +
+			String(setup.matchIdent || '').toUpperCase() +
+			' : ' +
+			String((setup.homeTeam && setup.homeTeam.teamName4) || '').toUpperCase() +
+			' vs ' +
+			String((setup.awayTeam && setup.awayTeam.teamName4) || '').toUpperCase() +
+		'</div>';
+		headerHTML += '  </div>';
+		headerHTML += '</div>';
+
+		headerCell.innerHTML = headerHTML;
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * TEAM NAME ROW
+		 * ---------------------------------------------------------
+		 */
+		var teamRow = tbody.insertRow(-1);
+
+
+		if(hasSubstitutes){
+
+			var homeTeamCell = createCell(
+				teamRow,
+				setup.homeTeam.teamName1,
+				2
+			);
+
+			var awayTeamCell = createCell(
+				teamRow,
+				setup.awayTeam.teamName1,
+				2
+			);
+
+			homeTeamCell.style.width = '50%';
+			awayTeamCell.style.width = '50%';
+
+			homeTeamCell.className += ' fb-team-cell';
+			awayTeamCell.className += ' fb-team-cell';
+
+			homeTeamCell.style.backgroundColor = '#F2C230';
+			awayTeamCell.style.backgroundColor = '#F2C230';
+
+			homeTeamCell.style.fontSize = '34px';
+			awayTeamCell.style.fontSize = '34px';
+
+			homeTeamCell.style.fontWeight = '900';
+			awayTeamCell.style.fontWeight = '900';
+
+			homeTeamCell.style.height = '60px';
+			awayTeamCell.style.height = '60px';
+
+		}else{
+
+			var homeTeamCell = createCell(
+				teamRow,
+				setup.homeTeam.teamName1
+			);
+
+			var awayTeamCell = createCell(
+				teamRow,
+				setup.awayTeam.teamName1
+			);
+
+			homeTeamCell.style.width = '50%';
+			awayTeamCell.style.width = '50%';
+
+			homeTeamCell.className += ' fb-team-cell';
+			awayTeamCell.className += ' fb-team-cell';
+
+			homeTeamCell.style.fontSize = '34px';
+			awayTeamCell.style.fontSize = '34px';
+
+			homeTeamCell.style.fontWeight = '900';
+			awayTeamCell.style.fontWeight = '900';
+
+			homeTeamCell.style.height = '60px';
+			awayTeamCell.style.height = '60px';
+		}
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * COLUMN HEADER
+		 * ---------------------------------------------------------
+		 */
+		var columnHeaderRow = tbody.insertRow(-1);
+
+
+		if(hasSubstitutes){
+
+			var h1 = createCell(columnHeaderRow, 'PLAYING 11');
+			var h2 = createCell(columnHeaderRow, 'IMP/SUB OPTIONS');
+			var h3 = createCell(columnHeaderRow, 'PLAYING 11');
+			var h4 = createCell(columnHeaderRow, 'IMP/SUB OPTIONS');
+
+			h1.style.width = '25%';
+			h2.style.width = '25%';
+			h3.style.width = '25%';
+			h4.style.width = '25%';
+
+			[h1,h2,h3,h4].forEach(function(cell){
+
+				cell.className += ' fb-column-head';
+
+				cell.style.height = '45px';
+				cell.style.backgroundColor = '#F2C230';
+				cell.style.fontSize = '22px';
+				cell.style.fontWeight = '900';
+
+			});
+
+		}else{
+
+			var h1 = createCell(columnHeaderRow, 'PLAYING 11');
+			var h2 = createCell(columnHeaderRow, 'PLAYING 11');
+
+			h1.style.width = '50%';
+			h2.style.width = '50%';
+
+			[h1,h2].forEach(function(cell){
+
+				cell.className += ' fb-column-head';
+
+				cell.style.height = '45px';
+				cell.style.backgroundColor = '#F2C230';
+				cell.style.fontSize = '22px';
+				cell.style.fontWeight = '900';
+
+			});
+		}
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * PLAYER NAME HELPER
+		 * ---------------------------------------------------------
+		 */
+		function getPlayerName(player){
+
+			if(!player){
+				return '';
+			}
+
+			var name = player.full_name || player.name || '';
+
+			if(player.captainWicketKeeper == 'wicket_keeper'){
+
+				name += ' (WK)';
+
+			}else if(player.captainWicketKeeper == 'captain'){
+
+				name += ' (C)';
+
+			}else if(player.captainWicketKeeper == 'captain_wicket_keeper'){
+
+				name += ' (C&WK)';
+			}
+
+			return name;
+		}
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * PLAYER ROWS
+		 * ---------------------------------------------------------
+		 */
+		var maxRows = Math.max(
+			homeSquad.length,
+			awaySquad.length,
+			homeSubstitutes.length,
+			awaySubstitutes.length,
+			11
+		);
+
+
+		for(var i = 0; i < maxRows; i++){
+
+			var playerRow = tbody.insertRow(-1);
+
+
+			if(hasSubstitutes){
+
+				var homePlayerCell = createCell(
+					playerRow,
+					getPlayerName(homeSquad[i])
+				);
+
+				var homeSubCell = createCell(
+					playerRow,
+					getPlayerName(homeSubstitutes[i])
+				);
+
+				var awayPlayerCell = createCell(
+					playerRow,
+					getPlayerName(awaySquad[i])
+				);
+
+				var awaySubCell = createCell(
+					playerRow,
+					getPlayerName(awaySubstitutes[i])
+				);
+
+
+				homePlayerCell.style.width = '25%';
+				homeSubCell.style.width = '25%';
+				awayPlayerCell.style.width = '25%';
+				awaySubCell.style.width = '25%';
+
+
+				[
+					homePlayerCell,
+					homeSubCell,
+					awayPlayerCell,
+					awaySubCell
+				].forEach(function(cell){
+
+					cell.className += ' fb-player-cell';
+
+					cell.style.backgroundColor = '#F2C230';
+					cell.style.fontSize = '25px';
+					cell.style.fontWeight = '700';
+					cell.style.height = '48px';
+
+				});
+
+
+				/*
+				 * Substitute cells get slightly different
+				 * visual treatment.
+				 */
+				homeSubCell.className += ' fb-substitute-cell';
+				awaySubCell.className += ' fb-substitute-cell';
+
+				homeSubCell.style.backgroundColor = '#E6B91F';
+				awaySubCell.style.backgroundColor = '#E6B91F';
+
+
 			}else{
-				table_detail = document.createElement('table');
-				table_detail.style = 'table-layout:fixed;';
-				table_detail.style.height = "230px";
-				table_detail.style.width = "375px";
-				table_detail.style.marginTop = "-16px";
-				//table_detail.style.marginBottom = "-2px";
-				table_detail.style.marginLeft = "11px";
-				table_detail.style.marginRight = "-12px";
-				table_detail.setAttribute('class', 'table table-bordered');
-				tbody = document.createElement('tbody');
-				table_detail.appendChild(tbody);
-				
-				for (var i = 1; i <= 5; i++){
-					row = tbody.insertRow(tbody.rows.length);
-					row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
-					switch(i){
-						case 1: case 2:  case 3:  case 4: case 5:
-							count = 3;
-							break;
-					}
-					for (var j = 1; j <= count; j++){
-						cell = row.insertCell(j-1);
-						switch(i){
-							case 1:
-								row.style = "background: #FFFFFF ; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
-								row.style.fontFamily = 'Rockwell';
-								switch(j){
-									case 1:
-										cell.style = "font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:18px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										cell.style.width = '30%';
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 1){
-												for(var key in inn.stats){
-													if(key == 'OVER' + inn.inningNumber){
-														if(inn.battingTeamId == dataToProcess.setup.homeTeamId){
-															if(inn.totalWickets >= 10){
-																cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + "<br />" + inn.totalRuns + ' (' + inn.stats[key] + ')';
-															}else{
-																cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + "<br />" + inn.totalRuns + '-' + inn.totalWickets + ' (' + inn.stats[key] + ')';
-															}
-														}
-														else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-															if(inn.totalWickets >= 10){
-																cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + "<br />" + inn.totalRuns + ' (' + inn.stats[key] + ')';
-															}else{
-																//cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + "<br />" + '188' + '-' + '8' + ' (' + '18.5' + ')';
-																cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + "<br />" + inn.totalRuns + '-' + inn.totalWickets + ' (' + inn.stats[key] + ')';
-															}
-														}
-													}
-												}
-											}
-										});
-										break;
-									case 2:
-										cell.style.width = '40%';
-										break;	
-									case 3:
-										cell.style = "font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:18px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										cell.style.width = '30%';
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												for(var key in inn.stats){
-													if(key == 'OVER'+ inn.inningNumber){
-														if(inn.battingTeamId == dataToProcess.setup.homeTeamId){
-															if(inn.totalWickets >= 10){
-																cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + "<br />" + inn.totalRuns + ' (' + inn.stats[key] + ')';
-															}else{
-																//cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + "<br />" + '188' + '-' + '8' + ' (' + '18.6' + ')';
-																cell.innerHTML = dataToProcess.setup.homeTeam.teamName4 + "<br />" + inn.totalRuns + '-' + inn.totalWickets + ' (' + inn.stats[key] + ')';
-															}
-														}
-														else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-															if(inn.totalWickets >= 10){
-																cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + "<br />" + inn.totalRuns + ' (' + inn.stats[key] + ')';
-															}else{
-																cell.innerHTML = dataToProcess.setup.awayTeam.teamName4 + "<br />" + inn.totalRuns + '-' + inn.totalWickets + ' (' + inn.stats[key] + ')';
-															}
-														}
-													}
-												}
-											}
-										});
-										break;
-								}
-								break;
-							case 2:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 1){
-												if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-													cell.innerHTML = inn.totalFours + '/' + inn.totalSixes;
-												}
-												else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-													cell.innerHTML = inn.totalFours + '/' + inn.totalSixes;
-												}
-											}
-										});
-										break
-									case 2:
-										cell.innerHTML = '4s/6s';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;
-									case 3:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-													cell.innerHTML = inn.totalFours + '/' + inn.totalSixes;
-												}
-												else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-													cell.innerHTML = inn.totalFours + '/' + inn.totalSixes;
-												}
-											}
-										});
-										break;
-								}
-								break;
-							case 3:
-								cell.style = "background: #FFFFFF ;font-weight: 600; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 1){
-												for(var key in inn.stats){
-													if(key == 'DOTBALLS' + inn.inningNumber){
-														cell.innerHTML = inn.stats[key];
-													}
-												}
-											}
-										});
-										break
-									case 2:
-										cell.innerHTML = 'DOTS';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;
-									case 3:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												for(var key in inn.stats){
-													if(key == 'DOTBALLS'  + inn.inningNumber){
-														cell.innerHTML = inn.stats[key];
-													}
-												}
-											}
-										});
-										break;
-								}
-								break;	
-							case 4:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 1 && inn.isCurrentInning == 'NO'){
-												for(var key in inn.stats){
-													if(key == 'COMPARE'){
-														cell.innerHTML = inn.stats[key] ;
-													}
-												}
-											}
-										});
-										break;
-									case 2:
-										cell.innerHTML = 'AT THIS STAGE';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-size:18px;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";		
-										break;
-									case 3:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2 && inn.isCurrentInning == 'YES'){
-												cell.innerHTML = inn.totalRuns + '-' + inn.totalWickets ;
-											}
-										});
-										break;
-								}
-								break;	
-							case 5:
-								cell.style = "background: #FFFFFF; font-weight: 600;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;";
-								cell.style.fontFamily = 'Rockwell';
-								cell.style.textAlign = "center";
-								switch(j){
-									case 1:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 1){
-												cell.innerHTML = inn.totalExtras ;
-											}
-										});
-										break;
-									case 2:
-										cell.innerHTML = 'EXTRAS';
-										cell.style = "background: #FFFFFF; font-weight: 700;color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;";
-										cell.style.fontFamily = 'Rockwell';
-										cell.style.textAlign = "center";
-										break;
-									case 3:
-										dataToProcess.match.inning.forEach(function(inn,index,arr){
-											if(inn.inningNumber == 2){
-												cell.innerHTML = inn.totalExtras;
-											}
-										});
-										break;
-								}
-								break;			
-						}
-					}
-				}
-			}
-			
-			table_Bowl = document.createElement('table');
-			table_Bowl.style = 'table-layout:fixed; width:40%;';
-			table_Bowl.style.marginTop = "-66px";
-			table_Bowl.style.marginRight = "-12px";
-			table_Bowl.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_Bowl.appendChild(tbody);
-			
-			for (var i = 1; i <= 3; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				//row.id = "bowlerId";
-				row.style = "background: #F7D774; color: #0A1747;font-weight: bold;border-color: Black;border-width: 2px;"
-				row.style.fontFamily = 'Rockwell';
-				var bowler_found = false;
-				switch(i){
-					case 1: case 2: case 3:
-						count = 5;
-						break;
-				}
-				for (var j = 1; j <= count; j++){
-					cell = row.insertCell(j-1);
-					//cell.id = 'bowlerId';
-					//cell.setAttribute("id","bowlerId");
-					switch (i){
-						case 1:
-							cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:17px;line-height: 13px;';
-							cell.style.fontFamily = 'Rockwell';
-							//cell.style.fontWeight = "900";
-							switch(j){
-								case 1:
-									cell.style.width = '40%';
-									break;
-								case 2:
-									cell.style.width = '15%';
-									cell.innerHTML = 'FIG';
-									break;
-								case 3:
-									cell.style.width = '15%';
-									cell.innerHTML = 'OVRS';
-									break;
-								case 4:
-									cell.style.width = '15%';
-									cell.innerHTML = 'DOTS';
-									break;
-								case 5:
-									cell.style.width = '15%';
-									cell.innerHTML = 'ECON';
-									break;
-							}
-							break;
-						case 2:
-							cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;line-height: 13px;';
-							cell.style.fontFamily = 'Rockwell';
-							dataToProcess.match.inning.forEach(function(inn,index,arr){
-								if(inn.isCurrentInning == 'YES'){
-									inn.bowlingCard.forEach(function(boc,index,arr2){
-										if(boc.status == 'CURRENTBOWLER'){
-											switch(j){
-												case 1:
-													cell.style="font-size:20px; font-weight: bold;border-color: Black;border-width: 2px;line-height: 13px;text-align:center;";
-													cell.innerHTML = boc.player.ticker_name.slice(0,10) + '*';
-													//cell.style.fontWeight = "900";
-													break;
-												case 2:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													cell.innerHTML = boc.wickets + '-' + boc.runs;
-													break;
-												case 3:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													cell.innerHTML = boc.overs + '.' + boc.balls;
-													break;
-												case 4:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													cell.innerHTML = boc.dots;
-													break;
-												case 5:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													if(boc.economyRate == 0){
-														cell.innerHTML = '-';
-													}else{
-														cell.innerHTML = boc.economyRate;
-													}
-													break;
-											}
-											bowler_found = true;
-										}
-									});
-								}
-								//$("bowlerId").hide();
-							});
-							if(bowler_found == false){
-								cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;line-height: 13px;';
-								cell.style.fontFamily = 'Rockwell';
-								dataToProcess.match.inning.forEach(function(inn,index,arr){
-									if(inn.isCurrentInning == 'YES'){
-										for(var key in inn.stats){
-											if(key == 'OTHER_BOWLER'){
-												switch(j){
-													case 1:
-														if(inn.stats[key].split(',')[0] == ''){
-															cell.innerHTML = '-';
-														}else{
-															cell.style="font-size:20px; font-weight: bold;border-color: Black;border-width: 2px;line-height: 13px;text-align:center;";
-															cell.innerHTML = inn.stats[key].split(',')[0].slice(0,10);
-															//cell.style.fontWeight = "900";
-														}
-														break;
-													case 2:
-														cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-														if(inn.stats[key].split(',')[0] == ''){
-															cell.innerHTML = '-';
-														}else{
-															cell.innerHTML = inn.stats[key].split(',')[1];
-														}
-														break;
-													case 3:
-														cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-														if(inn.stats[key].split(',')[0] == ''){
-															cell.innerHTML = '-';
-														}else{
-															cell.innerHTML = inn.stats[key].split(',')[4];
-														}
-														
-														break;
-													case 4:
-														cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-														if(inn.stats[key].split(',')[0] == ''){
-															cell.innerHTML = '-';
-														}else{
-															cell.innerHTML = inn.stats[key].split(',')[2];
-														}
-														
-														break;
-													case 5:
-														cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-														if(inn.stats[key].split(',')[0] == ''){
-															cell.innerHTML = '-';
-														}else{
-															if(inn.stats[key].split(',')[3] == 0){
-																cell.innerHTML = '-';
-															}else{
-																cell.innerHTML = inn.stats[key].split(',')[3];
-															}
-														}
-														
-														break;
-												}
-											}
-										}
-									}
-									//$("bowlerId").hide();
-								});
-							}
-							break;
-						case 3:
-							cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;line-height: 13px;';
-							cell.style.fontFamily = 'Rockwell';
-							dataToProcess.match.inning.forEach(function(inn,index,arr){
-								if(inn.isCurrentInning == 'YES'){
-									for(var key in inn.stats){
-										if(key == 'PREVIOUS_BOWLER'){
-											switch(j){
-												case 1:
-													if(inn.stats[key].split(',')[0] == ''){
-														cell.style="font-size:20px; font-weight: bold;border-color: Black;border-width: 2px;line-height: 13px;";
-														cell.innerHTML = '-';
-													}else{
-														cell.style="font-size:20px; font-weight: bold;border-color: Black;border-width: 2px;line-height: 13px;text-align:center;";
-														cell.innerHTML = inn.stats[key].split(',')[0].slice(0,10);
-													}
-													//cell.style.fontWeight = "900";
-													break;
-												case 2:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													if(inn.stats[key].split(',')[0] == ''){
-														cell.innerHTML = '-';
-													}else{
-														cell.innerHTML = inn.stats[key].split(',')[1];
-													}
-													break;
-												case 3:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													if(inn.stats[key].split(',')[0] == ''){
-														cell.innerHTML = '-';
-													}else{
-														cell.innerHTML = inn.stats[key].split(',')[4];
-													}
-													break;
-												case 4:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													if(inn.stats[key].split(',')[0] == ''){
-														cell.innerHTML = '-';
-													}else{
-														cell.innerHTML = inn.stats[key].split(',')[2];
-													}
-													break;
-												case 5:
-													cell.style = 'text-align:center;font-weight: bold;border-color: Black;border-width: 2px;font-size:20px;line-height: 13px;';
-													if(inn.stats[key].split(',')[0] == ''){
-														cell.innerHTML = '-';
-													}else{
-														if(inn.stats[key].split(',')[3] == 0){
-															cell.innerHTML = '-';
-														}else{
-															cell.innerHTML = inn.stats[key].split(',')[3];
-														}
-													}
-													break;
-											}
-										}
-									}
-								}
-							});
-							break;	
-					}
-				}
-			}
-			
-			table_Other = document.createElement('table');
-			table_Other.style = 'table_Other-layout: fixed; width:400px; margin-left:1%; margin-right:1%;';
-			table_Other.style.marginTop = "-16px";
-			table_Other.style.marginRight = "-12px";
-			table_Other.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_Other.appendChild(tbody);
-			
-			for (var i = 1; i <= 3; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				switch(i){
-					case 1:
-						row.style="background-color: Red; color: #FFFFFF;";
-						row.style.fontFamily = 'Rockwell';
-						row.style.textAlign = "center";
-						dataToProcess.match.inning.forEach(function(inn,index,arr){
-								row.innerHTML = 'INFORMATIVE POP-UP';
-						});
-						break;
-					case 2:
-						row.style="background-color: white ;";
-						row.style.fontFamily = 'Rockwell';
-						row.style.textAlign = "center";
-						dataToProcess.match.inning.forEach(function(inn,index,arr){
-								row.innerHTML = 'Speed';
-						});
-						break;
-					case 3:
-						row.style="background-color: white ;";
-						row.style.fontFamily = 'Rockwell';
-						row.style.textAlign = "center";
-						dataToProcess.match.inning.forEach(function(inn,index,arr){
-								row.innerHTML = 'KPH';
-						});
-						break;
-				}
-			}
-			
-			table_Other1 = document.createElement('table');
-			table_Other1.style = 'table-layout:fixed; width:543px;';
-			table_Other1.style.marginTop = "-66px";
-			table_Other1.style.marginLeft = "12px";
-			table_Other1.style.marginRight = "-12px";
-			table_Other1.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_Other1.appendChild(tbody);
-			
-			for (var i = 1; i <= 3; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				row.style="background-color: #08123A ; color: #FFFFFF;font-weight: bold;border-width: 2px;border-color: Black;line-height: 13px;";
-				row.style.fontFamily = 'Rockwell';
-				switch(i){
-					case 1: case 3:
-						count = 1;
-						break;
-					case 2:
-						count = 2;
-						break;	
-						
-				}
-				for (var j=1;j<=count;j++){
-					cell = row.insertCell(j-1);
-					cell.style="background: #08123A;font-weight: bold;border-width: 2px;line-height: 13px;";
-					cell.style.textAlign = 'center';
-					//cell.style.paddingRight = '80px';
-					switch(i){
-						case 1:
-							switch(j){
-								case 1:
-									cell.colSpan = 2;
-									cell.style="font-size:20px; font-weight: bold; font-weight: bold;border-width: 2px;line-height: 13px;";
-									cell.style.height = '20px';
-									cell.style.textAlign = 'center';
-									cell.style.fontWeight = "700";
-									cell.style.width = '100%';
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'TOSS'){
-													cell.innerHTML = inn.stats[key].toUpperCase();
-												}
-											}		
-										}
-										if(inn.inningNumber == 2 && inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'INNING_STATUS'){
-													//cell.innerHTML = 'JKSS NEED 999 RUNS TO WIN FROM 20.0 OVERS (DLS)';
-													cell.innerHTML = inn.stats[key].toUpperCase();
-												}
-											}
-										}	
-									});
-									break;
-							}
-							break;
-						case 2:
-							switch(j){
-								case 1:
-									cell.style.width = '20%';
-									cell.style.fontWeight = "500";
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'DLS'){
-													if(inn.stats[key] == ''){
-														cell.innerHTML = '';
-													}else{
-														cell.innerHTML = 'DLS PAR SCORE: ' + inn.stats[key];	
-													}
-												}
-											}
-											//cell.innerHTML = 'DLS PAR SCORE: 88';
-										}
-									});	
-									break;
-								case 2 :
-									cell.style.width = '80%';
-									cell.style="font-size:15px; font-weight: bold; font-weight: bold;border-width: 2px;line-height: 13px;";
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'DLS_EQUATION'){
-													//cell.innerHTML = "STRIKERS ARE 99 RUNS BEHIND PAR SCORE";
-													cell.innerHTML = inn.stats[key];
-												}
-											}
-										}
-									});
-									break;	
-							}
-							break;
-						case 3:
-							switch(j){
-								case 1:
-									cell.style="font-size:19px; font-weight: bold; font-weight: bold;border-width: 2px;line-height: 13px;";
-									cell.style.textAlign = 'center';
-									cell.colSpan = 2;
-									cell.style.fontWeight = "700";
-									cell.style.width = '100%';
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											inn.bowlingCard.forEach(function(boc,index,arr2){
-												//row.innerHTML = 'This Over Runs:-';
-												for(var key in inn.stats){
-													if(key == 'ThisOver'){
-														if(boc.status == 'CURRENTBOWLER'){
-															cell.innerHTML = 'THIS OVER :- '  + inn.stats[key];
-														}
-														else if(boc.status == 'LASTBOWLER'){
-															cell.innerHTML = 'LAST OVER :- ' + inn.stats[key];
-														}
-													}
-												}
-												for(var key in inn.stats){
-													if(key == 'OVER'){
-														if(boc.status == 'CURRENTBOWLER'){
-															if(inn.stats[key] == ''){
-																cell.innerHTML = cell.innerHTML;
-															}else{
-																//cell.innerHTML = cell.innerHTML + ' (' + '8nb,8nb,8nb,8nb,8nb,8nb,8nb,8nb,8nb,8nb' + ')';
-																cell.innerHTML = cell.innerHTML + ' (' + inn.stats[key] + ')';
-															}
-														}
-														else if(boc.status == 'LASTBOWLER'){
-															if(inn.stats[key] == ''){
-																cell.innerHTML = cell.innerHTML;
-															}else{
-																cell.innerHTML = cell.innerHTML + ' (' + inn.stats[key] + ')';
-															}
-														}
-													}
-												}
-											});
-										}
-									});
-							}
-							break;		
-					}
-				}
-			}
-			
-			table_PS = document.createElement('table');
-			table_PS.style = 'table-layout:fixed;height:90px;width:430px;';
-			table_PS.style.marginTop = "-16px";
-			table_PS.style.marginLeft = "12px";
-			table_PS.style.marginRight = "-12px";
-			table_PS.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_PS.appendChild(tbody);
 
-			for (var i = 1; i <= 3; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				row.style="background-color: #B0B0B0 ;color: #0A1747 ;border-color: Black;border-width: 2px;";
-				row.style.fontFamily = 'Rockwell';
-				switch(i){
-					case 1: case 2:
-						count = 5;
-						break;
-					case 3:
-						count = 1;
-						break;	
-						
-				}
-				for (var j=1;j<=count;j++){
-					cell = row.insertCell(j-1);
-					cell.style="background: #B0B0B0 ; font-weight: bold;font-size:16px;border-color: Black;border-width: 2px;";
-					cell.style.textAlign = "center";
-					switch(i){
-						case 1:
-							switch(j){
-								case 1:
-									cell.style.width = "50px"
-									cell.style.height = "50px"
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											if(inn.inningNumber == 1){
-												cell.innerHTML = 'RUN <br> RATE';
-												cell.style.fontWeight = "700";
-											}else{
-												cell.innerHTML = '';
-												cell.style.fontWeight = "700";
-											}
-										}
-										
-									});
-									
-									break;
-								case 2 : case 3: case 4: case 5:
-									cell.style.width = "50px"
-									cell.style.height = "50px"
-									cell.style.fontWeight = "600";
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										//if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES')
-										if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'PS'){
-													const myArray = inn.stats[key].split(",");
-													switch(j){
-														case 2:
-															cell.innerHTML = '@' + myArray[1] + '<br>(CRR)' ;
-															break;
-														case 3:
-															cell.innerHTML = '@' + myArray[3] ;
-															break;
-														case 4:
-															cell.innerHTML = '@' + myArray[5] ;
-															break;
-														case 5:
-															cell.innerHTML = '@' + myArray[7] ;
-															break;
-													}
-												}
-											}
-										}
-									});
-									break;
-							}
-							break;
-						case 2:
-							switch(j){
-								case 1:
-									cell.style.width = "50px"
-									cell.style.height = "50px"
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											if(inn.inningNumber == 1){
-												cell.innerHTML = 'SCORES';
-												cell.style.fontWeight = "700";
-											}else{
-												cell.innerHTML = '';
-												cell.style.fontWeight = "700";
-											}
-										}
-										
-									});
-									
-									break;
-								case 2 : case 3: case 4: case 5:
-									cell.style.width = "50px"
-									cell.style.height = "50px"
-									cell.style.fontWeight = "600";
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.inningNumber == 1 && inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'PS'){
-													const myArray = inn.stats[key].split(",");
-													switch(j){
-														case 2:
-															cell.innerHTML = myArray[0] ;
-															break;
-														case 3:
-															cell.innerHTML = myArray[2] ;
-															break;
-														case 4:
-															cell.innerHTML = myArray[4] ;
-															break;
-														case 5:
-															cell.innerHTML = myArray[6] ;
-															break;
-													}
-												}
-											}
-										}
-									});
-									break;
-							}
-							break;
-						case 3:
-							switch(j){
-								case 1:
-									cell.colSpan = 5;
-									cell.style.fontWeight = "700";
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.isCurrentInning == 'YES'){
-											for(var key in inn.stats){
-												if(key == 'BOUNDARY'){
-													cell.innerHTML = 'BALL SINCE LAST BOUNDARY: ' + inn.stats[key];
-												}
-											}
-										}
-									});
-									break;
-								/*case 1:
-									cell.colSpan = 3;
-									break;*/
-							}
-							break;		
-					}
-				}
-			}
-			
-			table_BC = document.createElement('table');
-			//table_BC.style = 'table-layout:fixed;';
-			table_BC.style.width = "610px";
-			//table_BC.style.height = '500px';
-			table_BC.style.marginTop = "-16px";
-			table_BC.style.marginRight = "-12px";
-			table_BC.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_BC.appendChild(tbody);
-			
-			dataToProcess.match.inning.forEach(function(inn,index,arr){
-				if(inn.isCurrentInning == 'YES'){
-					for (var i = 1; i <= 11; i++){
-						row = tbody.insertRow(tbody.rows.length);
-						row.style="background-color: #F2C230 ;border-width: 2px;line-height: 5px;";
-						row.style.fontFamily = 'Rockwell';
-						switch(i){
-							case 1:
-								count = 1;
-								break;
-							case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11:
-								count = 3;	
-								break;
-						}
-						for (var j=1;j<=count;j++){
-							cell = row.insertCell(j-1);
-							switch(i){
-								case 1:
-									switch(j){
-										case 1:
-										cell.colSpan = 3;
-										cell.style = "background: #F2C230;font-weight: bold;border-color: Black;border-width: 2px;line-height: 20px;";
-										cell.style.height = '20px';
-										cell.style.textAlign = "center";
-										cell.style.fontWeight = "900";
-										cell.innerHTML = 'BATTING CARD';
-										break;
-									}	
-									break;
-								default:
-									cell.style="background-color: #F2C230 ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;font-size:18px;";
-									cell.style.height = "39px"
-									
-									switch(j){
-										case 1:
-										cell.style="background-color: #F2C230 ; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;font-size:18px;";
-										cell.style.width = "25%"
-										if(inn.fallsOfWickets.length > 0){
-											if(inn.fallsOfWickets[i-2] != null){
-												dataToProcess.setup.homeSquad.forEach(function(hs,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == hs.playerId){
-														cell.innerHTML = hs.ticker_name;
-													}
-												});
-												dataToProcess.setup.homeOtherSquad.forEach(function(hos,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == hos.playerId){
-														cell.innerHTML = hos.ticker_name;
-													}
-												});
-												dataToProcess.setup.homeSubstitutes.forEach(function(hsub,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == hsub.playerId){
-														cell.innerHTML = hsub.ticker_name;
-													}
-												});
-												dataToProcess.setup.awaySquad.forEach(function(as,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == as.playerId){
-														cell.innerHTML = as.ticker_name;
-													}
-												});
-												dataToProcess.setup.awayOtherSquad.forEach(function(aos,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == aos.playerId){
-														cell.innerHTML = aos.ticker_name;
-													}
-												});
-												dataToProcess.setup.awaySubstitutes.forEach(function(asub,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == asub.playerId){
-														cell.innerHTML = asub.ticker_name;
-													}
-												});
-											}else{
-												cell.innerHTML = '';
-											}
-										}
-										break;
-										case 2:
-										cell.style="background-color: #F2C230 ; font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;";
-										cell.style.width = '60%';
-										
-										if(inn.fallsOfWickets.length >= 0){
-											if(inn.fallsOfWickets[i-2] != null){
-												inn.battingCard.forEach(function(bc,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == bc.playerId){
-														cell.innerHTML = bc.howOutText;
-														//cell.style.maxWidth = "9px;";
-														//cell.innerHTML = 'st KRANTHI KUMAR b CHANDRA KOUSHIK';
-													}
-												});
-											}else{
-												cell.innerHTML = '';
-											}
-										}
-										break;
-										case 3:
-										cell.style="font-size:18px; font-weight: bold;text-align:center;border-color: Black;border-width: 2px;line-height: 5px;";
-										cell.style.width = '15%';
-										if(inn.fallsOfWickets.length >= 0){
-											if(inn.fallsOfWickets[i-2] != null){
-												inn.battingCard.forEach(function(bc,index,arr){
-													if(inn.fallsOfWickets[i-2].fowPlayerID == bc.playerId){
-														cell.innerHTML = bc.runs + ' (' + bc.balls + ')';
-													}
-												});
-												//cell.innerHTML = inn.fallsOfWickets[i-1].fowRuns + '(' + inn.fallsOfWickets[i-1].fowBalls + ')';
-											}else{
-												cell.innerHTML = '';
-											}
-										}
-										break;
-									}
-									break;	
-							}
-						}
-					}
-				}
-			});
-			
-			table_BOC = document.createElement('table');
-			//table_BOC.style = 'table-layout:fixed; width:40%;';
-			//table_BOC.style.height = "400px";
-			table_BOC.style.width = "543px";
-			table_BOC.style.marginTop = "-16px";
-			table_BOC.style.marginLeft = "12px";
-			table_BOC.style.marginRight = "-13px";
-			table_BOC.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_BOC.appendChild(tbody);
-			
-			dataToProcess.match.inning.forEach(function(inn,index,arr){
-				if(inn.isCurrentInning == 'YES'){
-					//alert(inn.bowlingCard.length)
-					/*inn.bowlingCard.forEach(function(boc,index,arr){
-						alert(inn.bowlingCard.length)
-					});*/
-					//inn.bowlingCard.forEach(function(boc,index,arr){
-						//alert(boc.length)
-						for (var i = 1; i <= 11; i++){
-							row = tbody.insertRow(tbody.rows.length);
-							row.style="background-color: #F7D774 ; color: #0A1747 ;border-color: Black;border-width: 2px;line-height: 10px;";
-							row.style.fontFamily = 'Rockwell';
-							switch(i){
-							case 1:
-								count = 1;
-								break;
-							case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11:
-								count = 3;	
-								break;
-							}
-							for (var j=1;j<=count;j++){
-								cell = row.insertCell(j-1);
-								cell.style="background: #F7D774 ;color: #0A1747 ;";
-								
-								switch(i){
-								case 1:
-									switch(j){
-										case 1:
-										cell.colSpan = 3;
-										cell.style = "background: #F7D774;font-weight: bold;color: #0A1747 ;border-color: Black;border-width: 2px;line-height: 20px;";
-										cell.style.height = '20px';
-										cell.style.textAlign = "center";
-										cell.style.fontWeight = "900";
-										cell.innerHTML = 'BOWLING CARD';
-										break;
-									}	
-									break;
-								default:
-									cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
-									cell.style.height = "38px"
-									switch(j){
-										case 1:
-											cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
-											cell.style.width = '60%';
-											cell.style.lineHeight = '10px';
-											//cell.style="background-color: #F7D774 ; font-size:14px; font-weight: bold;";
-											dataToProcess.setup.homeSquad.forEach(function(hs,index,arr){
-												//alert(hs.playerId)
-												if(inn.bowlingCard[i-2] != null){
-													if(inn.bowlingCard[i-2].playerId == hs.playerId){
-														//alert(hs.ticker_name)
-														cell.innerHTML = hs.ticker_name;
-													}
-												}else{
-													cell.innerHTML = '';
-												}
-												
-											});
-											dataToProcess.setup.homeOtherSquad.forEach(function(hos,index,arr){
-												//alert(hs.playerId)
-												if(inn.bowlingCard[i-2] != null){
-													if(inn.bowlingCard[i-2].playerId == hos.playerId){
-														//alert(hs.ticker_name)
-														cell.innerHTML = hos.ticker_name;
-													}
-												}else{
-													cell.innerHTML = '';
-												}
-												
-											});
-											dataToProcess.setup.homeSubstitutes.forEach(function(hsub,index,arr){
-												//alert(hs.playerId)
-												if(inn.bowlingCard[i-2] != null){
-													if(inn.bowlingCard[i-2].playerId == hsub.playerId){
-														//alert(hs.ticker_name)
-														cell.innerHTML = hsub.ticker_name;
-													}
-												}else{
-													cell.innerHTML = '';
-												}
-												
-											});
-											dataToProcess.setup.awaySquad.forEach(function(as,index,arr){
-												if(inn.bowlingCard[i-2] != null){
-													if(inn.bowlingCard[i-2].playerId == as.playerId){
-														//alert(hs.ticker_name)
-														cell.innerHTML = as.ticker_name;
-													}
-												}else{
-													cell.innerHTML = '';
-												}
-												
-											});
-											dataToProcess.setup.awayOtherSquad.forEach(function(aos,index,arr){
-												if(inn.bowlingCard[i-2] != null){
-													if(inn.bowlingCard[i-2].playerId == aos.playerId){
-														//alert(hs.ticker_name)
-														cell.innerHTML = aos.ticker_name;
-													}
-												}else{
-													cell.innerHTML = '';
-												}
-												
-											});
-											dataToProcess.setup.awaySubstitutes.forEach(function(asub,index,arr){
-												if(inn.bowlingCard[i-2] != null){
-													if(inn.bowlingCard[i-2].playerId == asub.playerId){
-														//alert(hs.ticker_name)
-														cell.innerHTML = asub.ticker_name;
-													}
-												}else{
-													cell.innerHTML = '';
-												}
-												
-											});
-											break;
-										case 2:
-											cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
-											cell.style.width = '20%';
-											if(inn.bowlingCard[i-2] != null){
-												cell.innerHTML = inn.bowlingCard[i-2].wickets + '-' + inn.bowlingCard[i-2].runs;
-											}else{
-												cell.innerHTML = '';
-											}
-												
-											
-											break;
-										case 3:
-											cell.style="color: #0A1747;font-weight: bold;text-align:center;border-color: Black;border-width: 2px;font-size:18px;line-height: 10px;";
-											cell.style.width = '20%';
-											//cell.style="background-color: #F7D774 ; font-size:14px; font-weight: bold;text-align:center;";
-											//cell.style.height = "43px"
-											//	cell.style.width = "50px"
-											if(inn.bowlingCard[i-2] != null){
-												cell.innerHTML = inn.bowlingCard[i-2].overs + '.' + inn.bowlingCard[i-2].balls;
-											}else{
-												cell.innerHTML = '';
-											}
-												
-											
-											break;	
-									}
-									break;	
-							}
-							}
-						}
-					//});	
-				}
-			});
-			table_fow = document.createElement('table');
-			//table_fow.style = 'table-layout:fixed;';
-			table_fow.style.height = "500px";
-			table_fow.style.width = "377px";
-			table_fow.style.marginTop = "-59px";
-			table_fow.style.marginLeft = "13px";
-			table_fow.style.marginRight = "-12px";
-			table_fow.setAttribute('class', 'table table-bordered');
-			tbody = document.createElement('tbody');
-			table_fow.appendChild(tbody);
-			for (var i = 1; i <= 12; i++){
-				row = tbody.insertRow(tbody.rows.length);
-				row.style.height = "10px"
-				row.style = "background: #0A1747 ; color: #F7D774";
-				row.style.fontFamily = 'Rockwell';
-				switch(i){
-					case 1: case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11:
-						count = 3;
-						break;
-					case 12:
-						count = 1;
-						break;	
-						
-				}
-				for (var j = 1; j <= count; j++){
-					cell = row.insertCell(j-1);
-					switch(i){			
-						case 1:
-							switch(j){
-								case 1:
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.inningNumber == 1){
-											if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-												cell.innerHTML = dataToProcess.setup.homeTeam.teamName4;
-											}
-											else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-												cell.innerHTML = dataToProcess.setup.awayTeam.teamName4;
-											}
-										}
-										cell.style = "background: #0A1747; color: #FFFFFF;font-size:22px;";
-										cell.style.textAlign = "center";
-										cell.style.height = "15px"
-										cell.style.width = '35%';
-										cell.style.fontWeight = "650";
-									});
-									break;
-								case 2:
-									cell.innerHTML = 'FOW';
-									cell.style = "background: #0A1747; color: #FFFFFF;font-size:22px;";
-									cell.style.textAlign = "center";
-									cell.style.height = "15px"
-									cell.style.width = '30%';
-									cell.style.fontWeight = "700";
-									break;
-								case 3:
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.inningNumber == 2){
-										if(inn.battingTeamId == dataToProcess.setup.homeTeamId){	
-											cell.innerHTML = dataToProcess.setup.homeTeam.teamName4;
-										}
-										else if(inn.battingTeamId == dataToProcess.setup.awayTeamId){
-											cell.innerHTML = dataToProcess.setup.awayTeam.teamName4;
-										}
-									}
-										cell.style = "background: #0A1747; color: #FFFFFF;font-size:22px;";
-										cell.style.textAlign = "center";
-										cell.style.height = "15px"
-										cell.style.width = '35%';
-										cell.style.fontWeight = "700";
-									});
-									break;
-							}
-							break;
-					case 2: case 3: case 4: case 5: case 6: case 7: case 8: case 9: case 10: case 11:
-						switch(j){
-							case 1:
-								cell.style = "background: #0A1747 ;color: #FFFFFF;font-size:18px;font-weight: bold;";
-								cell.style.textAlign = "center";
-								cell.style.width = "20px"
-								cell.style.height = "20px"
-								cell.style.fontWeight = "600";
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.inningNumber == 1){
-											if(inn.fallsOfWickets.length >= i-1){
-												cell.innerHTML = inn.fallsOfWickets[i-2].fowRuns + ' (' + inn.fallsOfWickets[i-2].fowOvers + '.' + 
-													inn.fallsOfWickets[i-2].fowBalls + ')' ;
-											}
-										}
-									});
-								break;
-							case 2:
-								cell.style = "background: #0A1747;color: #FFFFFF;font-size:18px;font-weight: bold;";
-								cell.style.width = "20px"
-								cell.style.height = "20px"
-								cell.style.textAlign = "center";
-								cell.style.fontWeight = "600";
-								cell.innerHTML = i - 1;
-								break;
-							case 3:
-								cell.style = "background: #0A1747;color: #FFFFFF;font-size:18px;font-weight: bold;";
-								cell.style.textAlign = "center";
-								cell.style.width = "20px"
-								cell.style.height = "20px"
-								cell.style.fontWeight = "600";
-									dataToProcess.match.inning.forEach(function(inn,index,arr){
-										if(inn.inningNumber == 2){
-											if(inn.fallsOfWickets.length >= i-1){
-												cell.innerHTML = inn.fallsOfWickets[i-2].fowRuns + ' (' + inn.fallsOfWickets[i-2].fowOvers + '.' + 
-													inn.fallsOfWickets[i-2].fowBalls + ')' ;
-											}
-										}
-									});
-								break;
-						}
-						break;
-					case 12:
-						switch(j){
-						case 1:
-							cell.colSpan = 3;
-							cell.style = "background: #0A1747; color: #FFFFFF;font-size:32px; font-weight: bold;";
-							cell.style.textAlign = "center";
-							cell.style.height = "15px"
-							cell.style.width = "20px"
-							cell.innerHTML = "DESIGN ON A DIME";	
-							break;
-						}
-						break;	
-					}
-				}
+				var homePlayerCell = createCell(
+					playerRow,
+					getPlayerName(homeSquad[i])
+				);
+
+				var awayPlayerCell = createCell(
+					playerRow,
+					getPlayerName(awaySquad[i])
+				);
+
+
+				homePlayerCell.style.width = '50%';
+				awayPlayerCell.style.width = '50%';
+
+
+				[
+					homePlayerCell,
+					awayPlayerCell
+				].forEach(function(cell){
+
+					cell.className += ' fb-player-cell';
+
+					cell.style.backgroundColor = '#F2C230';
+					cell.style.fontSize = '25px';
+					cell.style.fontWeight = '700';
+					cell.style.height = '48px';
+
+				});
 			}
 		}
-		
-		if($('#select_page').val() == 'fruit'){
-		//	alert($('#select_page').val())
-			//alert($('#select_page :selected').val())
-			//alert(document.getElementById('select_page').value)
-			$('#fruit_captions_div').append(table_head);
-			$('#fruit_captions_div').append(table_bat);
-			$('#fruit_captions_div').append(table_score);
-			$('#fruit_captions_div').append(table_detail);
-			$('#fruit_captions_div').append(table_Bowl);
-			//$('#fruit_captions_div').append(table_Other);
-			$('#fruit_captions_div').append(table_Other1);
-			//$('#fruit_captions_div').append(table_PS);
-			$('#fruit_captions_div').append(table_BC);
-			$('#fruit_captions_div').append(table_BOC);
-			$('#fruit_captions_div').append(table_fow);
-			document.getElementById('fruit_captions_div').style.display = '';
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * FOOTER / TOSS
+		 * ---------------------------------------------------------
+		 */
+		var footerRow = tbody.insertRow(-1);
+
+		var footerCell = createCell(
+			footerRow,
+			tossText,
+			columnCount
+		);
+
+
+		footerCell.className += ' fb-footer-cell';
+
+		footerCell.style.backgroundColor = '#0A1747';
+		footerCell.style.color = '#FFFFFF';
+		footerCell.style.fontSize = '28px';
+		footerCell.style.fontWeight = '900';
+		footerCell.style.height = '55px';
+		footerCell.style.textAlign = 'center';
+		footerCell.style.verticalAlign = 'middle';
+
+
+
+		/*
+		 * ---------------------------------------------------------
+		 * PREMIUM TEAMS GRAPHIC CSS
+		 *
+		 * Uses the same Royal Navy + Gold visual language as the
+		 * supplied Fruit scoreboard CSS. This changes styling only;
+		 * no Teams data or data-selection logic is changed.
+		 * ---------------------------------------------------------
+		 */
+		if(!document.getElementById('fb-teams-premium-style')){
+
+			var teamsStyle = document.createElement('style');
+			teamsStyle.id = 'fb-teams-premium-style';
+
+			teamsStyle.innerHTML =
+				'html, body{' +
+					'margin:0 !important;' +
+					'padding:0 !important;' +
+					'width:100% !important;' +
+					'height:100% !important;' +
+					'overflow:hidden !important;' +
+					'background:#0A1747 !important;' +
+				'}' +
+
+				'#fruit_teams_div{' +
+					'position:fixed !important;' +
+					'top:0 !important;' +
+					'left:0 !important;' +
+					'right:0 !important;' +
+					'bottom:0 !important;' +
+					'width:100vw !important;' +
+					'height:100vh !important;' +
+					'margin:0 !important;' +
+					'padding:0 !important;' +
+					'overflow:hidden !important;' +
+					'background:#0A1747 !important;' +
+					'box-sizing:border-box !important;' +
+				'}' +
+
+				'#fruit_teams_div table{' +
+					'width:100% !important;' +
+					'height:100% !important;' +
+					'margin:0 !important;' +
+					'padding:0 !important;' +
+					'border-collapse:collapse !important;' +
+					'table-layout:fixed !important;' +
+					'background:#0A1747 !important;' +
+					'font-family:"Oswald","Segoe UI",Arial,sans-serif !important;' +
+				'}' +
+
+				'#fruit_teams_div td{' +
+					'border:1px solid #000 !important;' +
+					'padding:4px 8px !important;' +
+					'box-sizing:border-box !important;' +
+					'overflow:hidden !important;' +
+					'white-space:nowrap !important;' +
+					'text-overflow:ellipsis !important;' +
+					'vertical-align:middle !important;' +
+					'text-align:center !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-header{' +
+					'width:100% !important;' +
+					'height:88px !important;' +
+					'min-height:88px !important;' +
+					'display:block !important;' +
+					'position:relative !important;' +
+					'box-sizing:border-box !important;' +
+					'background:linear-gradient(180deg,#16276B 0%,#0A1747 58%,#060C29 100%) !important;' +
+					'border:2px solid #000 !important;' +
+					'overflow:hidden !important;' +
+					'text-align:left !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-header:before{' +
+					'content:"" !important;' +
+					'position:absolute !important;' +
+					'inset:0 !important;' +
+					'background:linear-gradient(180deg,rgba(255,255,255,.12) 0%,rgba(255,255,255,0) 38%) !important;' +
+					'pointer-events:none !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-logo{' +
+					'position:absolute !important;' +
+					'left:18px !important;' +
+					'top:50% !important;' +
+					'transform:translateY(-50%) !important;' +
+					'z-index:2 !important;' +
+					'display:flex !important;' +
+					'align-items:center !important;' +
+					'gap:10px !important;' +
+					'padding:8px 14px !important;' +
+					'color:#fff !important;' +
+					'font-family:"Oswald","Segoe UI",Arial,sans-serif !important;' +
+					'font-weight:700 !important;' +
+					'letter-spacing:.5px !important;' +
+					'font-size:clamp(18px,1.35vw,25px) !important;' +
+					'white-space:nowrap !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-logo-mark{' +
+					'display:none !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-logo-image{' +
+					'height:46px !important;' +
+					'width:auto !important;' +
+					'max-width:54px !important;' +
+					'object-fit:contain !important;' +
+					'display:block !important;' +
+					'flex:0 0 auto !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-logo-mark{' +
+					'width:42px !important;' +
+					'height:42px !important;' +
+					'min-width:42px !important;' +
+					'border-radius:50% !important;' +
+					'background:linear-gradient(180deg,#2A3B8A,#0A1747) !important;' +
+					'display:flex !important;' +
+					'align-items:center !important;' +
+					'justify-content:center !important;' +
+					'font-size:18px !important;' +
+					'color:#F2C230 !important;' +
+					'border:2px solid #F2C230 !important;' +
+					'box-sizing:border-box !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-title{' +
+					'position:absolute !important;' +
+					'left:50% !important;' +
+					'top:50% !important;' +
+					'transform:translate(-50%,-50%) !important;' +
+					'z-index:1 !important;' +
+					'width:78% !important;' +
+					'text-align:center !important;' +
+					'padding:6px 10px !important;' +
+					'line-height:1.15 !important;' +
+					'box-sizing:border-box !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-tourney{' +
+					'font-family:"Rajdhani","Segoe UI",Arial,sans-serif !important;' +
+					'font-size:clamp(21px,1.55vw,28px) !important;' +
+					'font-weight:800 !important;' +
+					'letter-spacing:2px !important;' +
+					'color:#F7D774 !important;' +
+					'margin-bottom:2px !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-match{' +
+					'font-family:"Oswald","Segoe UI",Arial,sans-serif !important;' +
+					'font-size:clamp(24px,2.15vw,34px) !important;' +
+					'font-weight:800 !important;' +
+					'letter-spacing:1px !important;' +
+					'color:#fff !important;' +
+					'text-shadow:0 2px 4px rgba(0,0,0,.6) !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-team-cell{' +
+					'background:linear-gradient(180deg,#FFE9A8 0%,#F2C230 50%,#C9971A 100%) !important;' +
+					'color:#0A1747 !important;' +
+					'font-family:"Oswald","Segoe UI",Arial,sans-serif !important;' +
+					'font-size:clamp(27px,2.15vw,38px) !important;' +
+					'font-weight:900 !important;' +
+					'letter-spacing:.8px !important;' +
+					'text-shadow:0 1px 0 rgba(255,255,255,.25) !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-column-head{' +
+					'background:linear-gradient(180deg,#16276B 0%,#0A1747 100%) !important;' +
+					'color:#F7D774 !important;' +
+					'font-family:"Oswald","Segoe UI",Arial,sans-serif !important;' +
+					'font-size:clamp(18px,1.35vw,24px) !important;' +
+					'font-weight:800 !important;' +
+					'letter-spacing:1px !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-player-cell{' +
+					'background:#0A1747 !important;' +
+					'color:#fff !important;' +
+					'font-family:"Oswald","Segoe UI",Arial,sans-serif !important;' +
+					'font-size:clamp(20px,1.55vw,28px) !important;' +
+					'font-weight:700 !important;' +
+					'letter-spacing:.3px !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-player-cell:nth-child(odd){' +
+					'background:#0F2050 !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-substitute-cell{' +
+					'background:#16276B !important;' +
+					'color:#F7D774 !important;' +
+				'}' +
+
+				'#fruit_teams_div .fb-footer-cell{' +
+					'background:linear-gradient(180deg,#16276B 0%,#0A1747 55%,#060C29 100%) !important;' +
+					'color:#fff !important;' +
+					'font-family:"Oswald","Segoe UI",Arial,sans-serif !important;' +
+					'font-size:clamp(22px,1.75vw,31px) !important;' +
+					'font-weight:900 !important;' +
+					'letter-spacing:1px !important;' +
+				'}' +
+
+				'#fruit_teams_div td{' +
+					'border-color:#000 !important;' +
+				'}';
+
+			document.head.appendChild(teamsStyle);
 		}
-		
+
+
 		if($('#select_page').val() == 'teams'){
+
+			/*
+			 * Append the existing Teams table first.
+			 * The table itself contains the new fb-header row.
+			 */
 			$('#fruit_teams_div').append(table_team);
+
+			table_team.style.width = '100%';
+			table_team.style.height = '100%';
+			table_team.style.margin = '0';
+			table_team.style.padding = '0';
+			table_team.style.boxSizing = 'border-box';
+
+			/*
+			 * Full viewport - remove browser/page spacing.
+			 */
+			$('html, body').css({
+				'margin': '0',
+				'padding': '0',
+				'width': '100%',
+				'height': '100%',
+				'overflow': 'hidden'
+			});
+
+			$('#fruit_teams_div').css({
+				'position': 'fixed',
+				'top': '0',
+				'left': '0',
+				'margin': '0',
+				'padding': '0',
+				'width': '100vw',
+				'height': '100vh',
+				'overflow': 'hidden',
+				'box-sizing': 'border-box'
+			});
+
 			document.getElementById('fruit_teams_div').style.display = '';
+
 		}
-		
+
+
 		if($('#select_page').val() == 'ident'){
-			//$('#fruit_teams_div').append(table_team);
+
 			document.getElementById('fruit_ident_div').style.display = '';
+
 		}
-		
+
+
+		/*
+		 * Prevent browser scrolling.
+		 */
 		$("body").css("overflow", "hidden");
+
+
 		break;
 	}
 }

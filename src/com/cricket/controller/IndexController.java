@@ -8,10 +8,14 @@ import java.lang.reflect.InvocationTargetException;
 import java.net.URISyntaxException;
 import java.text.SimpleDateFormat;
 import java.util.ArrayList;
+import java.util.Arrays;
+import java.util.Collections;
 import java.util.Date;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
+import java.util.stream.Collectors;
+
 import jakarta.servlet.http.HttpServletRequest;
 import jakarta.xml.bind.JAXBContext;
 import jakarta.xml.bind.JAXBException;
@@ -197,27 +201,152 @@ session_Configurations = new Configurations();
 			
 			for(Inning inn : session_match.getMatch().getInning()){
 				Map<String, String> phaseStats = inn.getStats();
-				if(phaseStats == null){
-					phaseStats = new HashMap<String,String>();
+
+				if (phaseStats == null) {
+				    phaseStats = new HashMap<String, String>();
 				}
-				String allInningPhaseWiseScore = CricketFunctions.getPhaseWiseScore(session_match,inn.getInningNumber(),session_match.getEventFile().getEvents()).split("\\|")[0]; 
-				if(allInningPhaseWiseScore != null && !allInningPhaseWiseScore.trim().isEmpty()) {
-					String[] allInningPhases = allInningPhaseWiseScore.split("_");
-					if(allInningPhases.length > 0) {
-						phaseStats.put("PHASE1", allInningPhases[0].replace(",", "-"));
-					}
-					if(allInningPhases.length > 1) {
-						phaseStats.put("PHASE2", allInningPhases[1].replace(",", "-"));
-					}
-					if(allInningPhases.length > 2) {
-						phaseStats.put("PHASE3", allInningPhases[2].replace(",", "-"));
-					}
-				} else {
-					phaseStats.put("PHASE1", "-");
-					phaseStats.put("PHASE2", "-");
-					phaseStats.put("PHASE3", "-");
+				 
+				// impact player
+				if (session_match.getEventFile() != null &&
+				        session_match.getEventFile().getEvents() != null) {
+
+				    List<Player> impactPlayers = new ArrayList<Player>();
+
+				    if (session_match.getSetup() != null) {
+
+				        if (session_match.getSetup().getHomeSquad() != null) {
+				            impactPlayers.addAll(session_match.getSetup().getHomeSquad());
+				        }
+
+				        if (session_match.getSetup().getHomeOtherSquad() != null) {
+				            impactPlayers.addAll(session_match.getSetup().getHomeOtherSquad());
+				        }
+
+				        if (session_match.getSetup().getHomeSubstitutes() != null) {
+				            impactPlayers.addAll(session_match.getSetup().getHomeSubstitutes());
+				        }
+
+				        if (session_match.getSetup().getAwaySquad() != null) {
+				            impactPlayers.addAll(session_match.getSetup().getAwaySquad());
+				        }
+
+				        if (session_match.getSetup().getAwayOtherSquad() != null) {
+				            impactPlayers.addAll(session_match.getSetup().getAwayOtherSquad());
+				        }
+
+				        if (session_match.getSetup().getAwaySubstitutes() != null) {
+				            impactPlayers.addAll(session_match.getSetup().getAwaySubstitutes());
+				        }
+				    }
+
+				    /*
+				     * Also check batting-card players.
+				     * This protects the case where a player is present
+				     * in battingCard but not present in one of the setup lists.
+				     */
+				    if (inn.getBattingCard() != null) {
+
+				        for (BattingCard bc : inn.getBattingCard()) {
+
+				            if (bc != null && bc.getPlayer() != null) {
+				                impactPlayers.add(bc.getPlayer());
+				            }
+				        }
+				    }
+
+				    /*
+				     * Remove duplicate players and determine Impact status.
+				     */
+				    Map<Integer, Player> uniqueImpactPlayers = new HashMap<Integer, Player>();
+
+				    for (Player p : impactPlayers) {
+
+				        if (p != null) {
+				            uniqueImpactPlayers.put(p.getPlayerId(), p);
+				        }
+				    }
+
+				    for (Player p : uniqueImpactPlayers.values()) {
+
+				        String impactStatus =
+				                CricketFunctions.checkBatAndBallImpactInOutPlayer(
+				                        session_match.getEventFile().getEvents(),
+				                        p.getPlayerId());
+
+				        if (impactStatus != null &&
+				                !impactStatus.trim().isEmpty() &&
+				                !"NONE".equalsIgnoreCase(impactStatus)) {
+
+				            phaseStats.put(
+				                    "IMPACT_STATUS_" + p.getPlayerId(),
+				                    impactStatus
+				            );
+				        }
+				    }
+				}
+				
+				// retired hurt
+				for (BattingCard bc : inn.getBattingCard()) {
+				    if (bc == null) {
+				        continue;
+				    }
+				    String uiStatus = "";
+				    String status = bc.getStatus();
+				    String howOut = bc.getHowOut();
+				    if (status != null &&
+				            status.equalsIgnoreCase(CricketUtil.OUT)) {
+				        if (bc.getHowOutText() != null &&
+				                !bc.getHowOutText().trim().isEmpty()) {
+				            uiStatus = bc.getHowOutText().toUpperCase();
+				        } else if (howOut != null &&
+				                !howOut.trim().isEmpty()) {
+				            uiStatus = howOut.replace("_", " ").toUpperCase();
+				        } else {
+				            uiStatus = "OUT";
+				        }
+				    }
+				    else if (status != null &&
+				            status.equalsIgnoreCase(CricketUtil.NOT_OUT)) {
+				        uiStatus = "NOT OUT";
+				    }
+				    else if (howOut != null &&
+				            howOut.equalsIgnoreCase(CricketUtil.RETIRED_HURT)) {
+				        uiStatus = "RETIRED HURT";
+				    }
+				    else {
+				        String concussionStatus = CricketFunctions.checkBatAndBallImpactInOutPlayer( session_match, bc.getPlayerId() );
+				        if ("CON_OUT".equalsIgnoreCase(concussionStatus)) {
+				            uiStatus = "CONCUSSED";
+				        } else if (howOut != null &&
+				                howOut.equalsIgnoreCase(CricketUtil.CONCUSSED)) {
+				            uiStatus = "CONCUSSED";
+				        } else {
+				            uiStatus = "TO BAT";
+				        }
+				    }
+				    phaseStats.put("BATSMAN_UI_STATUS_" + bc.getPlayerId(),uiStatus);
 				}
 				inn.setStats(phaseStats);
+				
+				// phase wise score
+				if (inn.getInningNumber() == 1) {
+				    phaseStats.put("PHASE1",MatchStats.getHomeFirstPowerPlay().getTotalRuns()
+				        + "-" + MatchStats.getHomeFirstPowerPlay().getTotalWickets());
+				    phaseStats.put("PHASE2", MatchStats.getHomeSecondPowerPlay().getTotalRuns()
+				        + "-" +MatchStats.getHomeSecondPowerPlay().getTotalWickets());
+				    phaseStats.put("PHASE3",MatchStats.getHomeThirdPowerPlay().getTotalRuns()
+				        + "-" +MatchStats.getHomeThirdPowerPlay().getTotalWickets());
+
+				} else if (inn.getInningNumber() == 2) {
+				    phaseStats.put("PHASE1",MatchStats.getAwayFirstPowerPlay().getTotalRuns()
+				        + "-" +MatchStats.getAwayFirstPowerPlay().getTotalWickets());
+				    phaseStats.put("PHASE2", MatchStats.getAwaySecondPowerPlay().getTotalRuns()
+				        + "-" +MatchStats.getAwaySecondPowerPlay().getTotalWickets());
+				    phaseStats.put("PHASE3",MatchStats.getAwayThirdPowerPlay().getTotalRuns()
+				        + "-" +MatchStats.getAwayThirdPowerPlay().getTotalWickets());
+				}
+				inn.setStats(phaseStats);
+				
 				if(inn.getIsCurrentInning().equalsIgnoreCase(CricketUtil.YES)) {
 					Map<String, String> stats = inn.getStats();
 					if(stats == null){
@@ -293,8 +422,15 @@ session_Configurations = new Configurations();
 							}
 						}
 						// Ball-by-ball CSV for the current/last over -> "OVER" key
-						String overText = CricketFunctions.getEventsText(CricketUtil.OVER, currentBowlerPlayerId, ",", session_match.getEventFile().getEvents(), 0).replace("BOUNDARY", "");
+						//String overText = CricketFunctions.getEventsText(CricketUtil.OVER, currentBowlerPlayerId, ",", session_match.getEventFile().getEvents(), 0).replace("BOUNDARY", "");
 						// "runs-ballcount-wickets" -> formatted "X RUNS & Y WICKETS" text -> "ThisOver" key
+						
+						String overText = String.join(",", new ArrayList<>(Arrays.asList(IndexController.MatchStats.getOverData().getThisOverTxt().split(",")))
+						        .stream().map(s -> s.replace("WIDE", "WD").replace("NO_BALL", "NB").replace("LEG_BYE", "LB").replace("BYE", "B")
+						                .replace("PENALTY", "PN").replace("LOG_WICKET", "W").replace("WICKET", "W").replace("BOUNDARY", ""))
+						        		.collect(Collectors.collectingAndThen(Collectors.toList(),list -> {Collections.reverse(list);
+						                    return list; })).toArray(new String[0]));
+						
 						String[] thisOverParts = CricketFunctions.processThisOverRunsCount(currentBowlerPlayerId, session_match.getEventFile().getEvents()).split("-");
 						int thisOverRuns = Integer.parseInt(thisOverParts[0]);
 						int thisOverWickets = Integer.parseInt(thisOverParts[2]);
